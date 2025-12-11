@@ -1156,7 +1156,10 @@
             document.getElementById('depth').value = 95;
             document.getElementById('seatHeight').value = 42;
             document.getElementById('price').value = 2499;
-            document.getElementById('productUrl').value = "https://exemplo-furniture.com/sofa-gray";
+            
+            // Dynamic URL generation for the AR asset
+            const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+            document.getElementById('productUrl').value = path + "/assets/model.usdz";
         }
 
         // Update the mock view in Step 4
@@ -1190,15 +1193,8 @@
 
             document.getElementById('resultName').innerText = product.name;
 
-            // Generate Link (Simulation)
-            const params = new URLSearchParams({
-                productId: product.id,
-                n: product.name,
-                w: product.dims.w,
-                h: product.dims.h,
-                d: product.dims.d
-            });
-            const finalLink = `${product.url}?ar_context=true&${params.toString()}`;
+            // Use the URL directly (e.g., pointing to the .usdz file)
+            const finalLink = product.url;
 
             // Clear previous QR
             document.getElementById('qrcode').innerHTML = "";
