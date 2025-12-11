@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Furniture AR Visualization - Pilot Demo</title>
+    <!-- Model Viewer Library -->
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
     <!-- QRCode.js Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
@@ -920,7 +922,18 @@
                         </div>
                         <div class="mock-content">
                             <div class="mock-image">
-                                <img id="mockProductImage" src="" alt="Product Mock">
+                                <!-- Replaced static image with Model Viewer -->
+                                <model-viewer 
+                                    id="arModelViewer"
+                                    src="assets/model.glb" 
+                                    ios-src="assets/model.usdz"
+                                    alt="A 3D model of an astronaut"
+                                    ar
+                                    ar-modes="scene-viewer webxr quick-look" 
+                                    camera-controls 
+                                    shadow-intensity="1"
+                                    style="width: 100%; height: 100%; background-color: #fafafa;">
+                                </model-viewer>
                             </div>
                             <div class="mock-details">
                                 <div class="mock-brand">PREMIUM COLLECTION</div>
@@ -931,7 +944,7 @@
                                 </div>
                                 
                                 <!-- Modern 2025 AR Button -->
-                                <button class="ar-btn-modern" onclick="handleMockArBtnClick()">
+                                <button class="ar-btn-modern" onclick="document.getElementById('arModelViewer').activateAR()">
                                     <div class="ar-icon-box">
                                         <span style="font-size: 14px;">⚡</span>
                                     </div>
@@ -1148,7 +1161,7 @@
 
         // Update the mock view in Step 4
         function updateMockView() {
-            document.getElementById('mockProductImage').src = uploadedImageSrc;
+            // document.getElementById('mockProductImage').src = uploadedImageSrc; // Element removed
             document.getElementById('mockProductTitle').innerText = document.getElementById('productName').value;
             document.getElementById('mockProductPrice').innerText = document.getElementById('price').value;
         }
