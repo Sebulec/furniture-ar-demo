@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Furniture AR Visualization - Pilot Demo</title>
+    <!-- QRCode.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #1a3a52; /* Dark Blue */
+            --secondary-color: #208a93; /* Teal */
+            --background-color: #f5f5f5; /* Soft Gray */
+            --white: #ffffff;
+            --text-color: #333333;
+            --border-color: #e0e0e0;
+            --success-color: #4caf50;
+            --error-color: #f44336;
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --radius: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 1rem 2rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        header p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 0.2rem;
+        }
+
+        /* Main Container */
+        main {
+            flex: 1;
+            width: 100%;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .progress-bar-bg {
+            background-color: #ddd;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            background-color: var(--secondary-color);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .steps-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        /* Cards */
+        .card {
+            background-color: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: transform 0.2s ease;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            font-size: 1.25rem;
+            border-bottom: 2px solid var(--background-color);
+            padding-bottom: 0.5rem;
+        }
+
+        /* Step Visibility */
+        .step-section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .step-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Step 1: Upload */
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: var(--radius);
+            padding: 3rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: #fafafa;
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            border-color: var(--secondary-color);
+            background-color: rgba(32, 138, 147, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+        }
+
+        .upload-btn {
+            background-color: var(--secondary-color);
+            color: var(--white);
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: background-color 0.2s;
+        }
+
+        .upload-btn:hover {
+            background-color: #176a71;
+        }
+
+        /* Step 2: Preview & AI */
+        .preview-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .image-preview-box {
+            width: 100%;
+            max-width: 400px;
+            height: 250px;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+
+        .image-preview-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .ai-status {
+            text-align: center;
+            width: 100%;
+        }
+
+        .scanning-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--secondary-color);
+            box-shadow: 0 0 10px var(--secondary-color);
+            animation: scan 2s infinite linear;
+            display: none;
+        }
+
+        @keyframes scan {
+            0% { top: 0; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        /* 3D Representation Placeholder */
+        .placeholder-3d {
+            width: 200px;
+            height: 200px;
+            background: #f0f0f0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            position: relative;
+            perspective: 600px;
+        }
+
+        .cube {
+            width: 100px;
+            height: 100px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotateCube 5s infinite linear;
+        }
+
+        .cube-face {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: rgba(32, 138, 147, 0.2);
+            border: 2px solid var(--secondary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: var(--primary-color);
+        }
+
+        .front  { transform: rotateY(0deg) translateZ(50px); }
+        .back   { transform: rotateY(180deg) translateZ(50px); }
+        .right  { transform: rotateY(90deg) translateZ(50px); }
+        .left   { transform: rotateY(-90deg) translateZ(50px); }
+        .top    { transform: rotateX(90deg) translateZ(50px); }
+        .bottom { transform: rotateX(-90deg) translateZ(50px); }
+
+        @keyframes rotateCube {
+            from { transform: rotateX(0) rotateY(0); }
+            to { transform: rotateX(360deg) rotateY(360deg); }
+        }
+
+        /* Step 3: Form */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .full-width {
+                grid-column: span 2;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .form-group input {
+            padding: 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 2px rgba(32, 138, 147, 0.2);
+        }
+
+        .sample-btn {
+            background: none;
+            border: 1px solid var(--secondary-color);
+            color: var(--secondary-color);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+
+        .sample-btn:hover {
+            background-color: rgba(32, 138, 147, 0.1);
+        }
+
+        /* Step 4: Result - Marketing Card */
+        .result-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 1.5rem;
+        }
+
+        .marketing-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+            max-width: 320px;
+            width: 100%;
+            position: relative;
+            text-align: center;
+        }
+
+        .marketing-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 12px 12px 0 0;
+        }
+
+        .marketing-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .marketing-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.3rem;
+        }
+
+        .marketing-subtitle {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .ar-arrow {
+            font-size: 1.5rem;
+            color: var(--secondary-color);
+            margin: 0.5rem 0;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-5px);}
+            60% {transform: translateY(-3px);}
+        }
+
+        #qrcode {
+            margin: 0 auto;
+            padding: 0.5rem;
+            background: white;
+        }
+
+        #qrcode img {
+            margin: 0 auto;
+        }
+
+        .marketing-footer {
+            margin-top: 1.5rem;
+            border-top: 1px solid #eee;
+            padding-top: 1rem;
+        }
+
+        .product-tag {
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 1rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        /* NEW: Mock Product Page Preview */
+        .integration-preview-section {
+            width: 100%;
+            margin-top: 2rem;
+            border-top: 1px solid #eee;
+            padding-top: 2rem;
+            text-align: left;
+        }
+
+        .mock-browser {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            background: #fff;
+            margin-top: 1rem;
+        }
+
+        .mock-browser-header {
+            background: #f1f1f1;
+            padding: 8px 12px;
+            display: flex;
+            gap: 6px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #ddd;
+        }
+
+        .dot.red { background-color: #ff5f56; }
+        .dot.yellow { background-color: #ffbd2e; }
+        .dot.green { background-color: #27c93f; }
+
+        .mock-content {
+            padding: 2rem;
+            display: flex;
+            gap: 2rem;
+            flex-direction: column;
+        }
+
+        @media (min-width: 600px) {
+            .mock-content {
+                flex-direction: row;
+            }
+        }
+
+        .mock-image {
+            flex: 1;
+            border-radius: 4px;
+            overflow: hidden;
+            background: #fafafa;
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mock-image img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .mock-details {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .mock-brand {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #999;
+            margin-bottom: 0.5rem;
+        }
+
+        .mock-title {
+            font-size: 1.8rem;
+            font-weight: 300;
+            margin-bottom: 0.5rem;
+            color: #111;
+        }
+
+        .mock-price {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #111;
+        }
+
+        .mock-desc {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+
+        /* 2025 Modern Button Style */
+        .ar-btn-modern {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 12px 24px;
+            border-radius: 100px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #111;
+            box-shadow: 
+                0 4px 6px -1px rgba(0, 0, 0, 0.05), 
+                0 2px 4px -1px rgba(0, 0, 0, 0.03),
+                inset 0 0 0 1px rgba(255,255,255,0.5);
+            position: relative;
+            overflow: hidden;
+            width: fit-content;
+        }
+
+        .ar-btn-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 10px 15px -3px rgba(0, 0, 0, 0.08), 
+                0 4px 6px -2px rgba(0, 0, 0, 0.04),
+                inset 0 0 0 1px rgba(255,255,255,0.8);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .ar-icon-box {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #208a93, #1a3a52);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+        }
+
+        .ar-btn-modern::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.8), 
+                transparent
+            );
+            transition: 0.5s;
+        }
+
+        .ar-btn-modern:hover::after {
+            left: 100%;
+            transition: 0.7s ease-in-out;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        /* Navigation Buttons */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #777;
+            font-size: 0.9rem;
+            background-color: #eee;
+            margin-top: auto;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background-color: #333;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Accessibility: Hidden Inputs */
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Loader */
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--secondary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 1rem auto;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Modal for Desktop QR View */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 2000; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.7); 
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 2rem;
+            border: 1px solid #888;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 12px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .close-modal {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            cursor: pointer;
+        }
+
+        .close-modal:hover,
+        .close-modal:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .modal-qr-container {
+            margin: 1.5rem auto;
+            display: flex;
+            justify-content: center;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Furniture AR Visualization</h1>
+        <p>Pilot Demo - Turn Product Photos into AR</p>
+    </header>
+
+    <main>
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+            <div class="steps-labels">
+                <span>Upload</span>
+                <span>Generate</span>
+                <span>Details</span>
+                <span>Done</span>
+            </div>
+        </div>
+
+        <!-- Step 1: Upload -->
+        <section id="step1" class="step-section active card">
+            <h2>Step 1: Upload Product Photo</h2>
+            <p style="margin-bottom: 1.5rem; color: #666;">Upload a clear photo of the furniture piece. Best results with a white background.</p>
+            
+            <div class="upload-area" id="dropZone">
+                <div class="upload-icon">📷</div>
+                <h3>Drag & Drop your image here</h3>
+                <p>or</p>
+                <input type="file" id="fileInput" class="visually-hidden" accept="image/*">
+                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">Select Image</button>
+            </div>
+            <div style="margin-top: 1rem; text-align: center;">
+                <button class="sample-btn" onclick="useSampleImage()">Use Sample Image</button>
+            </div>
+        </section>
+
+        <!-- Step 2: AI Generation Simulation -->
+        <section id="step2" class="step-section card">
+            <h2>Step 2: AI Model Generation</h2>
+            <div class="preview-container">
+                <div class="image-preview-box">
+                    <div class="scanning-line" id="scanLine"></div>
+                    <img id="imagePreview" src="" alt="Uploaded Furniture">
+                </div>
+                
+                <div class="ai-status">
+                    <p id="aiStatusText" style="font-weight: 500; margin-bottom: 1rem;">Analyzing image geometry...</p>
+                    <div class="loader" id="aiLoader"></div>
+                    
+                    <div id="modelPlaceholder" style="display: none;">
+                        <div class="placeholder-3d">
+                            <div class="cube">
+                                <div class="cube-face front">FRONT</div>
+                                <div class="cube-face back">BACK</div>
+                                <div class="cube-face right">RIGHT</div>
+                                <div class="cube-face left">LEFT</div>
+                                <div class="cube-face top">TOP</div>
+                                <div class="cube-face bottom">BTM</div>
+                            </div>
+                        </div>
+                        <p style="margin-top: 1rem; color: var(--secondary-color);">3D Model Generated Successfully</p>
+                        <p style="font-size: 0.8rem; color: #999;">(Simulation using local placeholder)</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="btn btn-outline" onclick="prevStep(1)">Back</button>
+                <button class="btn btn-primary" id="step2Next" disabled onclick="nextStep(3)">Continue to Details</button>
+            </div>
+        </section>
+
+        <!-- Step 3: Product Details -->
+        <section id="step3" class="step-section card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h2>Step 3: Product Details</h2>
+                <button class="sample-btn" onclick="fillSampleData()">Fill Sample Data</button>
+            </div>
+            
+            <form id="productForm" onsubmit="event.preventDefault(); nextStep(4);">
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="productName">Product Name *</label>
+                        <input type="text" id="productName" placeholder="e.g. Modern Gray Sofa" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="width">Width (cm) *</label>
+                        <input type="number" id="width" min="1" step="0.1" placeholder="e.g. 240" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="height">Height (cm) *</label>
+                        <input type="number" id="height" min="1" step="0.1" placeholder="e.g. 85" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="depth">Depth (cm) *</label>
+                        <input type="number" id="depth" min="1" step="0.1" placeholder="e.g. 95" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="seatHeight">Seat Height (cm)</label>
+                        <input type="number" id="seatHeight" min="1" step="0.1" placeholder="Optional">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="price">Price (Currency) *</label>
+                        <input type="number" id="price" min="0" step="0.01" placeholder="e.g. 2499" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="productUrl">Product Page URL</label>
+                        <input type="url" id="productUrl" placeholder="https://..." required>
+                    </div>
+                </div>
+
+                <div class="nav-buttons">
+                    <button type="button" class="btn btn-outline" onclick="prevStep(2)">Back</button>
+                    <button type="submit" class="btn btn-primary">Generate AR QR Code</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Step 4: Final Result -->
+        <section id="step4" class="step-section card">
+            <h2>Step 4: Your AR Experience is Ready!</h2>
+            
+            <div class="result-container">
+                
+                <!-- Marketing Card Preview -->
+                <div class="marketing-card" id="marketingCard">
+                    <div class="marketing-header">
+                        <div class="marketing-title">See it in your room</div>
+                        <div class="marketing-subtitle">Scan with your phone camera</div>
+                        <div class="ar-arrow">⬇</div>
+                    </div>
+                    
+                    <div id="qrcode"></div>
+                    
+                    <div class="marketing-footer">
+                        <div class="product-tag" id="resultName">Product Name</div>
+                        <div style="font-size: 0.8rem; color: #888; margin-top:0.2rem;">AR Visualization</div>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" onclick="downloadMarketingCard()">
+                        <span>⬇️</span> Download Poster
+                    </button>
+                    <button class="btn btn-outline" onclick="copyLink()">
+                        <span>📋</span> Copy Link
+                    </button>
+                    <button class="btn btn-outline" onclick="window.print()">
+                        <span>🖨️</span> Print
+                    </button>
+                </div>
+
+                <div style="margin-top: 1rem; text-align: left; background: #f9f9f9; padding: 1rem; border-radius: 8px; font-size: 0.9rem; width: 100%;">
+                    <strong>Tech Data Encoded:</strong>
+                    <ul id="summaryList" style="margin-left: 1.5rem; margin-top: 0.5rem; color: #666;">
+                        <!-- JS fills this -->
+                    </ul>
+                </div>
+
+                <!-- NEW: Integration Preview Section -->
+                <div class="integration-preview-section">
+                    <h3>Integration Preview</h3>
+                    <p style="color: #666; font-size: 0.9rem;">Here is how the AR button could look on your product page:</p>
+                    
+                    <div class="mock-browser">
+                        <div class="mock-browser-header">
+                            <div class="dot red"></div>
+                            <div class="dot yellow"></div>
+                            <div class="dot green"></div>
+                        </div>
+                        <div class="mock-content">
+                            <div class="mock-image">
+                                <img id="mockProductImage" src="" alt="Product Mock">
+                            </div>
+                            <div class="mock-details">
+                                <div class="mock-brand">PREMIUM COLLECTION</div>
+                                <h4 class="mock-title" id="mockProductTitle">Product Title</h4>
+                                <div class="mock-price" id="mockProductPrice">$0.00</div>
+                                <div class="mock-desc">
+                                    Experience luxury in every detail. Designed for modern living spaces, offering both comfort and style.
+                                </div>
+                                
+                                <!-- Modern 2025 AR Button -->
+                                <button class="ar-btn-modern" onclick="handleMockArBtnClick()">
+                                    <div class="ar-icon-box">
+                                        <span style="font-size: 14px;">⚡</span>
+                                    </div>
+                                    <span>View in your room</span>
+                                </button>
+                                
+                                <div style="margin-top: 0.8rem; font-size: 0.75rem; color: #999;">
+                                    * Works on iOS & Android
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="nav-buttons">
+                <button class="btn btn-outline" onclick="prevStep(3)">Edit Details</button>
+                <button class="btn btn-primary" onclick="location.reload()">Start New</button>
+            </div>
+        </section>
+        
+        <!-- How It Works (Footer area) -->
+        <section style="margin-top: 3rem; text-align: center;">
+            <h3>How It Works</h3>
+            <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; margin-top: 1rem;">
+                <div style="width: 200px; padding: 1rem;">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">📸</div>
+                    <strong>1. Upload</strong>
+                    <p style="font-size: 0.8rem;">Retailer uploads a standard product photo.</p>
+                </div>
+                <div style="width: 200px; padding: 1rem;">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">🤖</div>
+                    <strong>2. AI Processing</strong>
+                    <p style="font-size: 0.8rem;">System generates a 3D model geometry.</p>
+                </div>
+                <div style="width: 200px; padding: 1rem;">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">📱</div>
+                    <strong>3. Customer Scans</strong>
+                    <p style="font-size: 0.8rem;">Customer sees the item in their home via AR.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>Furniture AR Visualization Pilot Demo &copy; 2025</p>
+        <p>Built for Furniture Retailers - Offline Prototype</p>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">Link copied to clipboard!</div>
+
+    <!-- Desktop QR Modal -->
+    <div id="qrModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeQrModal()">&times;</span>
+            <h3 style="color: var(--primary-color);">Scan to View</h3>
+            <p style="font-size: 0.9rem; color: #666;">Open your phone camera to see this item in your room.</p>
+            <div id="modalQrContainer" class="modal-qr-container"></div>
+            <p style="font-size: 0.8rem; color: #888;">Works with iOS QuickLook & Android SceneViewer</p>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let currentStep = 1;
+        let uploadedImageSrc = null;
+        let qrCodeObj = null;
+
+        // Elements
+        const progressBar = document.getElementById('progressBar');
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const imagePreview = document.getElementById('imagePreview');
+        const scanLine = document.getElementById('scanLine');
+        const aiStatusText = document.getElementById('aiStatusText');
+        const aiLoader = document.getElementById('aiLoader');
+        const modelPlaceholder = document.getElementById('modelPlaceholder');
+        const step2Next = document.getElementById('step2Next');
+
+        // Initialization
+        updateProgress();
+
+        // Drag & Drop Handling
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+            dropZone.classList.add('dragover');
+        }
+
+        function unhighlight() {
+            dropZone.classList.remove('dragover');
+        }
+
+        dropZone.addEventListener('drop', handleDrop, false);
+        fileInput.addEventListener('change', (e) => handleFiles(e.target.files), false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        }
+
+        function handleFiles(files) {
+            if (files.length > 0) {
+                const file = files[0];
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        uploadedImageSrc = e.target.result;
+                        nextStep(2);
+                        simulateAI();
+                    }
+                    reader.readAsDataURL(file);
+                } else {
+                    alert('Please upload an image file.');
+                }
+            }
+        }
+
+        function useSampleImage() {
+            uploadedImageSrc = "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
+            nextStep(2);
+            simulateAI();
+        }
+
+        // Navigation Logic
+        function nextStep(step) {
+            if (step === 2 && !uploadedImageSrc) {
+                alert('Please upload an image first.');
+                return;
+            }
+            if (step === 4) {
+                generateQRCode();
+                updateMockView();
+            }
+
+            document.querySelectorAll('.step-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(`step${step}`).classList.add('active');
+            currentStep = step;
+            updateProgress();
+            window.scrollTo(0, 0);
+        }
+
+        function prevStep(step) {
+            document.querySelectorAll('.step-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(`step${step}`).classList.add('active');
+            currentStep = step;
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const percentage = ((currentStep - 1) / 3) * 100;
+            progressBar.style.width = `${percentage}%`;
+        }
+
+        // AI Simulation Logic
+        function simulateAI() {
+            imagePreview.src = uploadedImageSrc;
+            
+            // Reset UI for Step 2
+            scanLine.style.display = 'block';
+            aiLoader.style.display = 'block';
+            modelPlaceholder.style.display = 'none';
+            step2Next.disabled = true;
+            aiStatusText.innerText = "Analyzing image geometry...";
+
+            // Timeline
+            setTimeout(() => {
+                aiStatusText.innerText = "Generating point cloud...";
+            }, 1500);
+
+            setTimeout(() => {
+                aiStatusText.innerText = "Reconstructing 3D mesh...";
+            }, 3000);
+
+            setTimeout(() => {
+                scanLine.style.display = 'none';
+                aiLoader.style.display = 'none';
+                modelPlaceholder.style.display = 'block'; // Show 3D cube
+                imagePreview.style.opacity = '0.3'; // Dim original image
+                aiStatusText.innerText = "Model Generation Complete!";
+                step2Next.disabled = false;
+            }, 4500);
+        }
+
+        // Form Logic
+        function fillSampleData() {
+            document.getElementById('productName').value = "Modern Gray Sofa";
+            document.getElementById('width').value = 240;
+            document.getElementById('height').value = 85;
+            document.getElementById('depth').value = 95;
+            document.getElementById('seatHeight').value = 42;
+            document.getElementById('price').value = 2499;
+            document.getElementById('productUrl').value = "https://exemplo-furniture.com/sofa-gray";
+        }
+
+        // Update the mock view in Step 4
+        function updateMockView() {
+            document.getElementById('mockProductImage').src = uploadedImageSrc;
+            document.getElementById('mockProductTitle').innerText = document.getElementById('productName').value;
+            document.getElementById('mockProductPrice').innerText = document.getElementById('price').value;
+        }
+
+        // QR Code Generation
+        function generateQRCode() {
+            const product = {
+                id: 'PROD-' + Math.floor(Math.random() * 10000),
+                name: document.getElementById('productName').value,
+                dims: {
+                    w: document.getElementById('width').value,
+                    h: document.getElementById('height').value,
+                    d: document.getElementById('depth').value
+                },
+                url: document.getElementById('productUrl').value
+            };
+
+            // Display Summary
+            const summaryList = document.getElementById('summaryList');
+            summaryList.innerHTML = `
+                <li>ID: ${product.id}</li>
+                <li>Name: ${product.name}</li>
+                <li>Dimensions: ${product.dims.w}x${product.dims.h}x${product.dims.d} cm</li>
+                <li>Price: ${document.getElementById('price').value}</li>
+            `;
+
+            document.getElementById('resultName').innerText = product.name;
+
+            // Generate Link (Simulation)
+            const params = new URLSearchParams({
+                productId: product.id,
+                n: product.name,
+                w: product.dims.w,
+                h: product.dims.h,
+                d: product.dims.d
+            });
+            const finalLink = `${product.url}?ar_context=true&${params.toString()}`;
+
+            // Clear previous QR
+            document.getElementById('qrcode').innerHTML = "";
+
+            // Generate new QR
+            qrCodeObj = new QRCode(document.getElementById('qrcode'), {
+                text: finalLink,
+                width: 200,
+                height: 200,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+            
+            // Store link for copy button
+            document.getElementById('qrcode').dataset.link = finalLink;
+        }
+
+        // Mock Button Handler
+        function handleMockArBtnClick() {
+            if (isMobile()) {
+                // Simulation of deep link open
+                showToast("📱 Launching AR Session...");
+                // In production: window.location.href = "intent://arvr.google.com/scene-viewer/..."
+            } else {
+                // Desktop: Show QR Code Modal
+                openQrModal();
+            }
+        }
+
+        // Mobile Detection Helper
+        function isMobile() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+        }
+
+        // Modal Logic
+        function openQrModal() {
+            const modal = document.getElementById('qrModal');
+            const container = document.getElementById('modalQrContainer');
+            
+            // Clone the QR code into the modal
+            container.innerHTML = '';
+            const qrImg = document.querySelector('#qrcode img');
+            if (qrImg) {
+                const clone = qrImg.cloneNode(true);
+                clone.style.width = '250px';
+                clone.style.height = 'auto';
+                container.appendChild(clone);
+            }
+            
+            modal.classList.add('active');
+        }
+
+        function closeQrModal() {
+            document.getElementById('qrModal').classList.remove('active');
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('qrModal');
+            if (event.target == modal) {
+                closeQrModal();
+            }
+        }
+
+        // Enhanced Download with Canvas
+        function downloadMarketingCard() {
+            // 1. Setup Canvas
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const width = 600;
+            const height = 800;
+            const padding = 40;
+            
+            canvas.width = width;
+            canvas.height = height;
+
+            // 2. Draw Background
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, height);
+
+            // 3. Draw Header Color Strip
+            const gradient = ctx.createLinearGradient(0, 0, width, 0);
+            gradient.addColorStop(0, '#1a3a52');
+            gradient.addColorStop(1, '#208a93');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, 20);
+
+            // 4. Text Configuration
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#1a3a52';
+
+            // 5. Draw Title
+            ctx.font = 'bold 42px -apple-system, sans-serif';
+            ctx.fillText("See it in your room", width / 2, 120);
+
+            // 6. Draw Subtitle
+            ctx.font = '24px -apple-system, sans-serif';
+            ctx.fillStyle = '#666666';
+            ctx.fillText("Scan with your phone camera", width / 2, 160);
+
+            // 7. Draw Arrow
+            ctx.beginPath();
+            ctx.moveTo(width / 2, 190);
+            ctx.lineTo(width / 2, 230);
+            ctx.lineTo(width / 2 - 15, 215);
+            ctx.moveTo(width / 2, 230);
+            ctx.lineTo(width / 2 + 15, 215);
+            ctx.strokeStyle = '#208a93';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
+            // 8. Draw QR Code
+            const qrImg = document.querySelector('#qrcode img');
+            if (qrImg) {
+                // Draw QR Code centered
+                const qrSize = 350;
+                ctx.drawImage(qrImg, (width - qrSize) / 2, 260, qrSize, qrSize);
+            }
+
+            // 9. Draw Footer Info
+            ctx.fillStyle = '#333333';
+            ctx.font = 'bold 32px -apple-system, sans-serif';
+            const productName = document.getElementById('productName').value || "Product";
+            ctx.fillText(productName, width / 2, 660);
+
+            ctx.fillStyle = '#888888';
+            ctx.font = '20px -apple-system, sans-serif';
+            ctx.fillText("AR Visualization Demo", width / 2, 700);
+            
+            ctx.font = 'italic 16px -apple-system, sans-serif';
+            ctx.fillStyle = '#aaaaaa';
+            ctx.fillText("Powered by Furniture AR Pilot", width / 2, 750);
+
+            // 10. Trigger Download
+            const link = document.createElement('a');
+            link.download = `ar-poster-${productName.replace(/\s+/g, '-').toLowerCase()}.png`;
+            link.href = canvas.toDataURL('image/png');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function copyLink() {
+            const link = document.getElementById('qrcode').dataset.link;
+            navigator.clipboard.writeText(link).then(() => {
+                showToast("Link copied to clipboard!");
+            }).catch(err => {
+                showToast("Failed to copy link.");
+            });
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
