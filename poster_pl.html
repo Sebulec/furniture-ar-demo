@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Furniture AR - Jak to działa?</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        
+        :root {
+            --primary-color: #1a3a52; /* Dark Blue */
+            --secondary-color: #208a93; /* Teal */
+            --accent-color: #f0f8ff;
+            --text-color: #333;
+            --white: #ffffff;
+        }
+
+        body {
+            width: 210mm;
+            height: 297mm;
+            margin: 0 auto;
+            padding: 0;
+            background: white;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: var(--text-color);
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Container for print preview in browser */
+        @media screen {
+            body {
+                margin: 20px auto;
+                box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            }
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: var(--white);
+            padding: 40px 40px;
+            text-align: center;
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+        }
+
+        h1 {
+            font-size: 36px;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            margin-top: 10px;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+        }
+
+        .intro {
+            text-align: center;
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .step-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        /* Connector Line */
+        .step-container:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 40px;
+            top: 80px;
+            width: 4px;
+            height: 60px; /* Adjust based on spacing */
+            background-color: #e0e0e0;
+            z-index: 0;
+        }
+
+        .icon-box {
+            width: 80px;
+            height: 80px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            color: var(--secondary-color);
+            border: 3px solid var(--secondary-color);
+            z-index: 1;
+            flex-shrink: 0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .step-content {
+            margin-left: 30px;
+            background: #fff;
+            padding: 15px 25px;
+            border-radius: 12px;
+            border-left: 5px solid var(--secondary-color);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            flex: 1;
+        }
+
+        .step-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .step-desc {
+            font-size: 14px;
+            line-height: 1.4;
+            color: #555;
+        }
+
+        .benefits {
+            background-color: var(--accent-color);
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
+
+        .benefit-item strong {
+            display: block;
+            color: var(--primary-color);
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .benefit-item span {
+            font-size: 14px;
+            color: #666;
+        }
+
+        footer {
+            padding: 30px 50px;
+            text-align: center;
+            border-top: 1px solid #eee;
+            color: #888;
+            font-size: 12px;
+        }
+
+        .highlight {
+            color: var(--secondary-color);
+            font-weight: bold;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Furniture AR</h1>
+        <div class="subtitle">Wirtualna przymierzalnia mebli w Twoim sklepie</div>
+    </header>
+
+    <div class="main-content">
+        
+        <div class="intro">
+            Zmień sposób, w jaki klienci kupują meble. Prosty proces w 4 krokach, który przenosi Twój asortyment do rozszerzonej rzeczywistości (AR).
+        </div>
+
+        <!-- Step 1 -->
+        <div class="step-container">
+            <div class="icon-box">📸</div>
+            <div class="step-content">
+                <div class="step-title">1. Wgraj Zdjęcie</div>
+                <div class="step-desc">
+                    Jako sprzedawca, po prostu robisz zdjęcie mebla lub wgrywasz istniejącą fotografię produktu na naszą platformę.
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step-container">
+            <div class="icon-box">⚙️</div>
+            <div class="step-content">
+                <div class="step-title">2. Przetwarzanie AI</div>
+                <div class="step-desc">
+                    Nasza sztuczna inteligencja automatycznie analizuje zdjęcie i tworzy geometrię 3D produktu w kilka sekund.
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step-container">
+            <div class="icon-box">🏷️</div>
+            <div class="step-content">
+                <div class="step-title">3. Generowanie Kodu</div>
+                <div class="step-desc">
+                    System tworzy unikalny <strong>Kod QR</strong> oraz link, który możesz umieścić na etykiecie cenowej w sklepie lub na stronie internetowej.
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="step-container">
+            <div class="icon-box">📱</div>
+            <div class="step-content">
+                <div class="step-title">4. Klient Skanuje</div>
+                <div class="step-desc">
+                    Klient skanuje kod telefonem i natychmiast widzi mebel we własnym salonie w skali 1:1. 
+                    <span class="highlight">Bez instalowania aplikacji!</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="benefits">
+            <div class="benefit-item">
+                <strong>+40%</strong>
+                <span>Wzrost konwersji</span>
+            </div>
+            <div class="benefit-item">
+                <strong>-30%</strong>
+                <span>Mniej zwrotów</span>
+            </div>
+            <div class="benefit-item">
+                <strong>24/7</strong>
+                <span>Wirtualny salon</span>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>Furniture AR Visualization Pilot Demo &copy; 2025</p>
+        <p>Projekt demonstracyjny dla branży meblarskiej</p>
+    </footer>
+
+</body>
+</html>
