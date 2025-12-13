@@ -1416,9 +1416,13 @@
         // Mock Button Handler
         function handleMockArBtnClick() {
             if (isMobile()) {
-                // Simulation of deep link open
-                showToast("📱 Launching AR Session...");
-                // In production: window.location.href = "intent://arvr.google.com/scene-viewer/..."
+                // Trigger the actual AR session from the model viewer instance
+                const viewer = document.getElementById('modelViewerStep2');
+                if (viewer) {
+                    viewer.activateAR();
+                } else {
+                    showToast("Error: Model viewer not found.");
+                }
             } else {
                 // Desktop: Show QR Code Modal
                 openQrModal();
