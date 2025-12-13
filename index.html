@@ -1166,18 +1166,12 @@
             }
         };
 
-        // State
-        let currentStep = 1;
-        let uploadedImageSrc = null;
-        let qrCodeObj = null;
-        let currentLang = 'en'; // Default
-
         // Elements
         const progressBar = document.getElementById('progressBar');
         const dropZone = document.getElementById('dropZone');
         const fileInput = document.getElementById('fileInput');
         const imagePreview = document.getElementById('imagePreview');
-        const modelViewerStep2 = document.getElementById('modelViewerStep2'); // NEW
+        const modelViewerStep2 = document.getElementById('modelViewerStep2');
         const scanLine = document.getElementById('scanLine');
         const aiStatusText = document.getElementById('aiStatusText');
         const aiLoader = document.getElementById('aiLoader');
@@ -1284,12 +1278,7 @@
         }
 
         function useSampleImage() {
-            // WARNING: Direct access to local file paths like this is generally blocked by browsers
-            // due to security restrictions (Cross-Origin policy).
-            // This will only work if the image is served from the same origin as the HTML file,
-            // or if the user manually selects the file using the input.
-            // For a functional demo with a "local sample", consider placing it in 'assets/'
-            // and referencing it as a relative path, or providing a base64 encoded image.
+            // Updated to use relative path for online compatibility
             uploadedImageSrc = "assets/sofa-dl-welur.jpg"; 
             nextStep(2);
             simulateAI();
@@ -1374,8 +1363,8 @@
 
         // Update the mock view in Step 4
         function updateMockView() {
-            // Using a placeholder image for the mock product in Step 4, as the model viewer is now in Step 2.
-            document.getElementById('mockProductImage').src = "assets/model.glb"; // Use glb as a placeholder for 2D image
+            // Using a placeholder image for the mock product in Step 4
+            document.getElementById('mockProductImage').src = "assets/model.glb"; 
             document.getElementById('mockProductTitle').innerText = document.getElementById('productName').value;
             document.getElementById('mockProductPrice').innerText = document.getElementById('price').value;
         }
