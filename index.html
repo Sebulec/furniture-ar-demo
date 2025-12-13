@@ -46,6 +46,7 @@
             padding: 1rem 2rem;
             text-align: center;
             box-shadow: var(--shadow);
+            position: relative;
         }
 
         header h1 {
@@ -57,6 +58,23 @@
             font-size: 0.9rem;
             opacity: 0.8;
             margin-top: 0.2rem;
+        }
+
+        .lang-switch {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: white;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        
+        .lang-switch:hover {
+            background: rgba(255, 255, 255, 0.3);
         }
 
         /* Main Container */
@@ -745,8 +763,9 @@
 <body>
 
     <header>
-        <h1>Furniture AR Visualization</h1>
-        <p>Pilot Demo - Turn Product Photos into AR</p>
+        <h1 data-i18n="headerTitle">Furniture AR Visualization</h1>
+        <p data-i18n="headerSubtitle">Pilot Demo - Turn Product Photos into AR</p>
+        <button class="lang-switch" onclick="toggleLanguage()" id="langSwitchBtn">PL</button>
     </header>
 
     <main>
@@ -756,33 +775,33 @@
                 <div class="progress-bar-fill" id="progressBar"></div>
             </div>
             <div class="steps-labels">
-                <span>Upload</span>
-                <span>Generate</span>
-                <span>Details</span>
-                <span>Done</span>
+                <span data-i18n="step1Label">Upload</span>
+                <span data-i18n="step2Label">Generate</span>
+                <span data-i18n="step3Label">Details</span>
+                <span data-i18n="step4Label">Done</span>
             </div>
         </div>
 
         <!-- Step 1: Upload -->
         <section id="step1" class="step-section active card">
-            <h2>Step 1: Upload Product Photo</h2>
-            <p style="margin-bottom: 1.5rem; color: #666;">Upload a clear photo of the furniture piece. Best results with a white background.</p>
+            <h2 data-i18n="step1Title">Step 1: Upload Product Photo</h2>
+            <p style="margin-bottom: 1.5rem; color: #666;" data-i18n="step1Desc">Upload a clear photo of the furniture piece. Best results with a white background.</p>
             
             <div class="upload-area" id="dropZone">
                 <div class="upload-icon">📷</div>
-                <h3>Drag & Drop your image here</h3>
-                <p>or</p>
+                <h3 data-i18n="dragDrop">Drag & Drop your image here</h3>
+                <p data-i18n="or">or</p>
                 <input type="file" id="fileInput" class="visually-hidden" accept="image/*">
-                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">Select Image</button>
+                <button class="upload-btn" onclick="document.getElementById('fileInput').click()" data-i18n="selectImgBtn">Select Image</button>
             </div>
             <div style="margin-top: 1rem; text-align: center;">
-                <button class="sample-btn" onclick="useSampleImage()">Use Sample Image</button>
+                <button class="sample-btn" onclick="useSampleImage()" data-i18n="useSampleBtn">Use Sample Image</button>
             </div>
         </section>
 
         <!-- Step 2: AI Generation Simulation -->
         <section id="step2" class="step-section card">
-            <h2>Step 2: AI Model Generation</h2>
+            <h2 data-i18n="step2Title">Step 2: AI Model Generation</h2>
             <div class="preview-container">
                 <div class="image-preview-box">
                     <div class="scanning-line" id="scanLine"></div>
@@ -790,7 +809,7 @@
                 </div>
                 
                 <div class="ai-status">
-                    <p id="aiStatusText" style="font-weight: 500; margin-bottom: 1rem;">Analyzing image geometry...</p>
+                    <p id="aiStatusText" style="font-weight: 500; margin-bottom: 1rem;" data-i18n="aiAnalyzing">Analyzing image geometry...</p>
                     <div class="loader" id="aiLoader"></div>
                     
                     <div id="modelPlaceholder" style="display: none;">
@@ -804,81 +823,81 @@
                                 <div class="cube-face bottom">BTM</div>
                             </div>
                         </div>
-                        <p style="margin-top: 1rem; color: var(--secondary-color);">3D Model Generated Successfully</p>
-                        <p style="font-size: 0.8rem; color: #999;">(Simulation using local placeholder)</p>
+                        <p style="margin-top: 1rem; color: var(--secondary-color);" data-i18n="modelSuccess">3D Model Generated Successfully</p>
+                        <p style="font-size: 0.8rem; color: #999;" data-i18n="modelSim">(Simulation using local placeholder)</p>
                     </div>
                 </div>
             </div>
 
             <div class="nav-buttons">
-                <button class="btn btn-outline" onclick="prevStep(1)">Back</button>
-                <button class="btn btn-primary" id="step2Next" disabled onclick="nextStep(3)">Continue to Details</button>
+                <button class="btn btn-outline" onclick="prevStep(1)" data-i18n="backBtn">Back</button>
+                <button class="btn btn-primary" id="step2Next" disabled onclick="nextStep(3)" data-i18n="continueBtn">Continue to Details</button>
             </div>
         </section>
 
         <!-- Step 3: Product Details -->
         <section id="step3" class="step-section card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <h2>Step 3: Product Details</h2>
-                <button class="sample-btn" onclick="fillSampleData()">Fill Sample Data</button>
+                <h2 data-i18n="step3Title">Step 3: Product Details</h2>
+                <button class="sample-btn" onclick="fillSampleData()" data-i18n="fillSampleBtn">Fill Sample Data</button>
             </div>
             
             <form id="productForm" onsubmit="event.preventDefault(); nextStep(4);">
                 <div class="form-grid">
                     <div class="form-group full-width">
-                        <label for="productName">Product Name *</label>
+                        <label for="productName" data-i18n="prodNameLabel">Product Name *</label>
                         <input type="text" id="productName" placeholder="e.g. Modern Gray Sofa" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="width">Width (cm) *</label>
+                        <label for="width" data-i18n="widthLabel">Width (cm) *</label>
                         <input type="number" id="width" min="1" step="0.1" placeholder="e.g. 240" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="height">Height (cm) *</label>
+                        <label for="height" data-i18n="heightLabel">Height (cm) *</label>
                         <input type="number" id="height" min="1" step="0.1" placeholder="e.g. 85" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="depth">Depth (cm) *</label>
+                        <label for="depth" data-i18n="depthLabel">Depth (cm) *</label>
                         <input type="number" id="depth" min="1" step="0.1" placeholder="e.g. 95" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="seatHeight">Seat Height (cm)</label>
+                        <label for="seatHeight" data-i18n="seatHeightLabel">Seat Height (cm)</label>
                         <input type="number" id="seatHeight" min="1" step="0.1" placeholder="Optional">
                     </div>
 
                     <div class="form-group">
-                        <label for="price">Price (Currency) *</label>
+                        <label for="price" data-i18n="priceLabel">Price (Currency) *</label>
                         <input type="number" id="price" min="0" step="0.01" placeholder="e.g. 2499" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="productUrl">Product Page URL</label>
+                        <label for="productUrl" data-i18n="prodUrlLabel">Product Page URL</label>
                         <input type="url" id="productUrl" placeholder="https://..." required>
                     </div>
                 </div>
 
                 <div class="nav-buttons">
-                    <button type="button" class="btn btn-outline" onclick="prevStep(2)">Back</button>
-                    <button type="submit" class="btn btn-primary">Generate AR QR Code</button>
+                    <button type="button" class="btn btn-outline" onclick="prevStep(2)" data-i18n="backBtn">Back</button>
+                    <button type="submit" class="btn btn-primary" data-i18n="genQrBtn">Generate AR QR Code</button>
                 </div>
             </form>
         </section>
 
         <!-- Step 4: Final Result -->
         <section id="step4" class="step-section card">
-            <h2>Step 4: Your AR Experience is Ready!</h2>
+            <h2 data-i18n="step4Title">Step 4: Your AR Experience is Ready!</h2>
             
             <div class="result-container">
                 
                 <!-- Marketing Card Preview -->
                 <div class="marketing-card" id="marketingCard">
                     <div class="marketing-header">
-                        <div class="marketing-title">See it in your room</div>
-                        <div class="marketing-subtitle">Scan with your phone camera</div>
+                        <div class="marketing-title" data-i18n="marketingTitle">See it in your room</div>
+                        <div class="marketing-subtitle" data-i18n="marketingSubtitle">Scan with your phone camera</div>
                         <div class="ar-arrow">⬇</div>
                     </div>
                     
@@ -886,24 +905,24 @@
                     
                     <div class="marketing-footer">
                         <div class="product-tag" id="resultName">Product Name</div>
-                        <div style="font-size: 0.8rem; color: #888; margin-top:0.2rem;">AR Visualization</div>
+                        <div style="font-size: 0.8rem; color: #888; margin-top:0.2rem;" data-i18n="marketingArVis">AR Visualization</div>
                     </div>
                 </div>
                 
                 <div class="action-buttons">
                     <button class="btn btn-secondary" onclick="downloadMarketingCard()">
-                        <span>⬇️</span> Download Poster
+                        <span>⬇️</span> <span data-i18n="downloadBtn">Download Poster</span>
                     </button>
                     <button class="btn btn-outline" onclick="copyLink()">
-                        <span>📋</span> Copy Link
+                        <span>📋</span> <span data-i18n="copyLinkBtn">Copy Link</span>
                     </button>
                     <button class="btn btn-outline" onclick="window.print()">
-                        <span>🖨️</span> Print
+                        <span>🖨️</span> <span data-i18n="printBtn">Print</span>
                     </button>
                 </div>
 
                 <div style="margin-top: 1rem; text-align: left; background: #f9f9f9; padding: 1rem; border-radius: 8px; font-size: 0.9rem; width: 100%;">
-                    <strong>Tech Data Encoded:</strong>
+                    <strong data-i18n="techDataHeader">Tech Data Encoded:</strong>
                     <ul id="summaryList" style="margin-left: 1.5rem; margin-top: 0.5rem; color: #666;">
                         <!-- JS fills this -->
                     </ul>
@@ -911,8 +930,8 @@
 
                 <!-- NEW: Integration Preview Section -->
                 <div class="integration-preview-section">
-                    <h3>Integration Preview</h3>
-                    <p style="color: #666; font-size: 0.9rem;">Here is how the AR button could look on your product page:</p>
+                    <h3 data-i18n="integPreviewTitle">Integration Preview</h3>
+                    <p style="color: #666; font-size: 0.9rem;" data-i18n="integPreviewDesc">Here is how the AR button could look on your product page:</p>
                     
                     <div class="mock-browser">
                         <div class="mock-browser-header">
@@ -948,10 +967,10 @@
                                     <div class="ar-icon-box">
                                         <span style="font-size: 14px;">⚡</span>
                                     </div>
-                                    <span>View in your room</span>
+                                    <span data-i18n="viewInRoomBtn">View in your room</span>
                                 </button>
                                 
-                                <div style="margin-top: 0.8rem; font-size: 0.75rem; color: #999;">
+                                <div style="margin-top: 0.8rem; font-size: 0.75rem; color: #999;" data-i18n="worksOn">
                                     * Works on iOS & Android
                                 </div>
                             </div>
@@ -962,29 +981,29 @@
             </div>
 
             <div class="nav-buttons">
-                <button class="btn btn-outline" onclick="prevStep(3)">Edit Details</button>
-                <button class="btn btn-primary" onclick="location.reload()">Start New</button>
+                <button class="btn btn-outline" onclick="prevStep(3)" data-i18n="editDetailsBtn">Edit Details</button>
+                <button class="btn btn-primary" onclick="location.reload()" data-i18n="startNewBtn">Start New</button>
             </div>
         </section>
         
         <!-- How It Works (Footer area) -->
         <section style="margin-top: 3rem; text-align: center;">
-            <h3>How It Works</h3>
+            <h3 data-i18n="howItWorksTitle">How It Works</h3>
             <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; margin-top: 1rem;">
                 <div style="width: 200px; padding: 1rem;">
                     <div style="font-size: 2rem; margin-bottom: 0.5rem;">📸</div>
-                    <strong>1. Upload</strong>
-                    <p style="font-size: 0.8rem;">Retailer uploads a standard product photo.</p>
+                    <strong data-i18n="step1WorkTitle">1. Upload</strong>
+                    <p style="font-size: 0.8rem;" data-i18n="step1WorkDesc">Retailer uploads a standard product photo.</p>
                 </div>
                 <div style="width: 200px; padding: 1rem;">
                     <div style="font-size: 2rem; margin-bottom: 0.5rem;">🤖</div>
-                    <strong>2. AI Processing</strong>
-                    <p style="font-size: 0.8rem;">System generates a 3D model geometry.</p>
+                    <strong data-i18n="step2WorkTitle">2. AI Processing</strong>
+                    <p style="font-size: 0.8rem;" data-i18n="step2WorkDesc">System generates a 3D model geometry.</p>
                 </div>
                 <div style="width: 200px; padding: 1rem;">
                     <div style="font-size: 2rem; margin-bottom: 0.5rem;">📱</div>
-                    <strong>3. Customer Scans</strong>
-                    <p style="font-size: 0.8rem;">Customer sees the item in their home via AR.</p>
+                    <strong data-i18n="step3WorkTitle">3. Customer Scans</strong>
+                    <p style="font-size: 0.8rem;" data-i18n="step3WorkDesc">Customer sees the item in their home via AR.</p>
                 </div>
             </div>
         </section>
@@ -992,21 +1011,21 @@
     </main>
 
     <footer>
-        <p>Furniture AR Visualization Pilot Demo &copy; 2025</p>
-        <p>Built for Furniture Retailers - Offline Prototype</p>
+        <p data-i18n="footerCopyright">Furniture AR Visualization Pilot Demo &copy; 2025</p>
+        <p data-i18n="footerDesc">Built for Furniture Retailers - Offline Prototype</p>
     </footer>
 
     <!-- Toast Notification -->
-    <div id="toast" class="toast">Link copied to clipboard!</div>
+    <div id="toast" class="toast" data-i18n="toastCopied">Link copied to clipboard!</div>
 
     <!-- Desktop QR Modal -->
     <div id="qrModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeQrModal()">&times;</span>
-            <h3 style="color: var(--primary-color);">Scan to View</h3>
-            <p style="font-size: 0.9rem; color: #666;">Open your phone camera to see this item in your room.</p>
+            <h3 style="color: var(--primary-color);" data-i18n="modalTitle">Scan to View</h3>
+            <p style="font-size: 0.9rem; color: #666;" data-i18n="modalDesc">Open your phone camera to see this item in your room.</p>
             <div id="modalQrContainer" class="modal-qr-container"></div>
-            <p style="font-size: 0.8rem; color: #888;">Works with iOS QuickLook & Android SceneViewer</p>
+            <p style="font-size: 0.8rem; color: #888;" data-i18n="modalFooter">Works with iOS QuickLook & Android SceneViewer</p>
         </div>
     </div>
 
@@ -1015,6 +1034,135 @@
         let currentStep = 1;
         let uploadedImageSrc = null;
         let qrCodeObj = null;
+        let currentLang = 'en'; // Default
+
+        // Translations
+        const translations = {
+            en: {
+                headerTitle: "Furniture AR Visualization",
+                headerSubtitle: "Pilot Demo - Turn Product Photos into AR",
+                step1Label: "Upload",
+                step2Label: "Generate",
+                step3Label: "Details",
+                step4Label: "Done",
+                step1Title: "Step 1: Upload Product Photo",
+                step1Desc: "Upload a clear photo of the furniture piece. Best results with a white background.",
+                dragDrop: "Drag & Drop your image here",
+                or: "or",
+                selectImgBtn: "Select Image",
+                useSampleBtn: "Use Sample Image",
+                step2Title: "Step 2: AI Model Generation",
+                aiAnalyzing: "Analyzing image geometry...",
+                aiPointCloud: "Generating point cloud...",
+                aiMesh: "Reconstructing 3D mesh...",
+                aiComplete: "Model Generation Complete!",
+                modelSuccess: "3D Model Generated Successfully",
+                modelSim: "(Simulation using local placeholder)",
+                backBtn: "Back",
+                continueBtn: "Continue to Details",
+                step3Title: "Step 3: Product Details",
+                fillSampleBtn: "Fill Sample Data",
+                prodNameLabel: "Product Name *",
+                widthLabel: "Width (cm) *",
+                heightLabel: "Height (cm) *",
+                depthLabel: "Depth (cm) *",
+                seatHeightLabel: "Seat Height (cm)",
+                priceLabel: "Price (Currency) *",
+                prodUrlLabel: "Product Page URL",
+                genQrBtn: "Generate AR QR Code",
+                step4Title: "Step 4: Your AR Experience is Ready!",
+                marketingTitle: "See it in your room",
+                marketingSubtitle: "Scan with your phone camera",
+                marketingProdName: "Product Name",
+                marketingArVis: "AR Visualization",
+                downloadBtn: "Download Poster",
+                copyLinkBtn: "Copy Link",
+                printBtn: "Print",
+                techDataHeader: "Tech Data Encoded:",
+                integPreviewTitle: "Integration Preview",
+                integPreviewDesc: "Here is how the AR button could look on your product page:",
+                viewInRoomBtn: "View in your room",
+                worksOn: "* Works on iOS & Android",
+                editDetailsBtn: "Edit Details",
+                startNewBtn: "Start New",
+                howItWorksTitle: "How It Works",
+                step1WorkTitle: "1. Upload",
+                step1WorkDesc: "Retailer uploads a standard product photo.",
+                step2WorkTitle: "2. AI Processing",
+                step2WorkDesc: "System generates a 3D model geometry.",
+                step3WorkTitle: "3. Customer Scans",
+                step3WorkDesc: "Customer sees the item in their home via AR.",
+                footerCopyright: "Furniture AR Visualization Pilot Demo &copy; 2025",
+                footerDesc: "Built for Furniture Retailers - Offline Prototype",
+                toastCopied: "Link copied to clipboard!",
+                toastFailed: "Failed to copy link.",
+                modalTitle: "Scan to View",
+                modalDesc: "Open your phone camera to see this item in your room.",
+                modalFooter: "Works with iOS QuickLook & Android SceneViewer"
+            },
+            pl: {
+                headerTitle: "Wizualizacja Mebli AR",
+                headerSubtitle: "Pilot Demo - Zamień zdjęcia produktów w AR",
+                step1Label: "Wgraj",
+                step2Label: "Generuj",
+                step3Label: "Szczegóły",
+                step4Label: "Gotowe",
+                step1Title: "Krok 1: Wgraj zdjęcie produktu",
+                step1Desc: "Wgraj wyraźne zdjęcie mebla. Najlepsze wyniki na białym tle.",
+                dragDrop: "Przeciągnij i upuść zdjęcie tutaj",
+                or: "lub",
+                selectImgBtn: "Wybierz zdjęcie",
+                useSampleBtn: "Użyj przykładowego zdjęcia",
+                step2Title: "Krok 2: Generowanie modelu AI",
+                aiAnalyzing: "Analiza geometrii obrazu...",
+                aiPointCloud: "Generowanie chmury punktów...",
+                aiMesh: "Rekonstrukcja siatki 3D...",
+                aiComplete: "Generowanie modelu zakończone!",
+                modelSuccess: "Model 3D wygenerowany pomyślnie",
+                modelSim: "(Symulacja przy użyciu lokalnego symbolu zastępczego)",
+                backBtn: "Wstecz",
+                continueBtn: "Przejdź do szczegółów",
+                step3Title: "Krok 3: Szczegóły produktu",
+                fillSampleBtn: "Wypełnij przykładowymi danymi",
+                prodNameLabel: "Nazwa produktu *",
+                widthLabel: "Szerokość (cm) *",
+                heightLabel: "Wysokość (cm) *",
+                depthLabel: "Głębokość (cm) *",
+                seatHeightLabel: "Wysokość siedziska (cm)",
+                priceLabel: "Cena (Waluta) *",
+                prodUrlLabel: "Adres URL strony produktu",
+                genQrBtn: "Wygeneruj kod QR AR",
+                step4Title: "Krok 4: Twoje doświadczenie AR jest gotowe!",
+                marketingTitle: "Zobacz w swoim pokoju",
+                marketingSubtitle: "Zeskanuj aparatem w telefonie",
+                marketingProdName: "Nazwa produktu",
+                marketingArVis: "Wizualizacja AR",
+                downloadBtn: "Pobierz plakat",
+                copyLinkBtn: "Kopiuj link",
+                printBtn: "Drukuj",
+                techDataHeader: "Zakodowane dane techniczne:",
+                integPreviewTitle: "Podgląd integracji",
+                integPreviewDesc: "Oto jak przycisk AR może wyglądać na Twojej stronie produktu:",
+                viewInRoomBtn: "Zobacz w swoim pokoju",
+                worksOn: "* Działa na iOS i Android",
+                editDetailsBtn: "Edytuj szczegóły",
+                startNewBtn: "Rozpocznij nowe",
+                howItWorksTitle: "Jak to działa",
+                step1WorkTitle: "1. Wgraj",
+                step1WorkDesc: "Sprzedawca wgrywa standardowe zdjęcie produktu.",
+                step2WorkTitle: "2. Przetwarzanie AI",
+                step2WorkDesc: "System generuje geometrię modelu 3D.",
+                step3WorkTitle: "3. Klient Skanuje",
+                step3WorkDesc: "Klient widzi przedmiot w swoim domu dzięki AR.",
+                footerCopyright: "Wizualizacja Mebli AR Pilot Demo &copy; 2025",
+                footerDesc: "Stworzone dla sprzedawców mebli - Prototyp Offline",
+                toastCopied: "Link skopiowany do schowka!",
+                toastFailed: "Nie udało się skopiować linku.",
+                modalTitle: "Zeskanuj, aby zobaczyć",
+                modalDesc: "Otwórz aparat w telefonie, aby zobaczyć ten przedmiot w swoim pokoju.",
+                modalFooter: "Działa z iOS QuickLook i Android SceneViewer"
+            }
+        };
 
         // Elements
         const progressBar = document.getElementById('progressBar');
@@ -1028,7 +1176,51 @@
         const step2Next = document.getElementById('step2Next');
 
         // Initialization
+        detectAndSetLanguage();
         updateProgress();
+
+        function detectAndSetLanguage() {
+            // Check browser language
+            const userLang = navigator.language || navigator.userLanguage; 
+            const langCode = userLang.substring(0, 2).toLowerCase();
+            
+            if (langCode === 'pl') {
+                setLanguage('pl');
+            } else {
+                setLanguage('en');
+            }
+        }
+
+        function toggleLanguage() {
+            const newLang = currentLang === 'en' ? 'pl' : 'en';
+            setLanguage(newLang);
+        }
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            const t = translations[lang];
+            
+            // Update button text
+            document.getElementById('langSwitchBtn').innerText = lang === 'en' ? 'PL' : 'EN';
+            
+            // Update all elements with data-i18n
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                if (t[key]) {
+                    if (element.tagName === 'INPUT' && element.getAttribute('placeholder')) {
+                        // Handle placeholders if needed (not strictly used here for i18n keys yet, but good practice)
+                        // element.placeholder = t[key];
+                    } else {
+                        element.innerHTML = t[key];
+                    }
+                }
+            });
+        }
+        
+        // Helper to get translation
+        function getTrans(key) {
+            return translations[currentLang][key] || key;
+        }
 
         // Drag & Drop Handling
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -1077,7 +1269,7 @@
                     }
                     reader.readAsDataURL(file);
                 } else {
-                    alert('Please upload an image file.');
+                    alert(getTrans('toastFailed') || 'Please upload an image file.');
                 }
             }
         }
@@ -1127,15 +1319,15 @@
             aiLoader.style.display = 'block';
             modelPlaceholder.style.display = 'none';
             step2Next.disabled = true;
-            aiStatusText.innerText = "Analyzing image geometry...";
+            aiStatusText.innerText = getTrans('aiAnalyzing');
 
             // Timeline
             setTimeout(() => {
-                aiStatusText.innerText = "Generating point cloud...";
+                aiStatusText.innerText = getTrans('aiPointCloud');
             }, 1500);
 
             setTimeout(() => {
-                aiStatusText.innerText = "Reconstructing 3D mesh...";
+                aiStatusText.innerText = getTrans('aiMesh');
             }, 3000);
 
             setTimeout(() => {
@@ -1143,7 +1335,7 @@
                 aiLoader.style.display = 'none';
                 modelPlaceholder.style.display = 'block'; // Show 3D cube
                 imagePreview.style.opacity = '0.3'; // Dim original image
-                aiStatusText.innerText = "Model Generation Complete!";
+                aiStatusText.innerText = getTrans('aiComplete');
                 step2Next.disabled = false;
             }, 4500);
         }
@@ -1287,14 +1479,14 @@
             ctx.textAlign = 'center';
             ctx.fillStyle = '#1a3a52';
 
-            // 5. Draw Title
+            // 5. Draw Title - USING TRANSLATION
             ctx.font = 'bold 42px -apple-system, sans-serif';
-            ctx.fillText("See it in your room", width / 2, 120);
+            ctx.fillText(getTrans('marketingTitle'), width / 2, 120);
 
-            // 6. Draw Subtitle
+            // 6. Draw Subtitle - USING TRANSLATION
             ctx.font = '24px -apple-system, sans-serif';
             ctx.fillStyle = '#666666';
-            ctx.fillText("Scan with your phone camera", width / 2, 160);
+            ctx.fillText(getTrans('marketingSubtitle'), width / 2, 160);
 
             // 7. Draw Arrow
             ctx.beginPath();
@@ -1323,7 +1515,8 @@
 
             ctx.fillStyle = '#888888';
             ctx.font = '20px -apple-system, sans-serif';
-            ctx.fillText("AR Visualization Demo", width / 2, 700);
+            // USING TRANSLATION
+            ctx.fillText(getTrans('marketingArVis'), width / 2, 700);
             
             ctx.font = 'italic 16px -apple-system, sans-serif';
             ctx.fillStyle = '#aaaaaa';
@@ -1341,9 +1534,9 @@
         function copyLink() {
             const link = document.getElementById('qrcode').dataset.link;
             navigator.clipboard.writeText(link).then(() => {
-                showToast("Link copied to clipboard!");
+                showToast(getTrans('toastCopied'));
             }).catch(err => {
-                showToast("Failed to copy link.");
+                showToast(getTrans('toastFailed'));
             });
         }
 
