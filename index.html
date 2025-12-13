@@ -806,6 +806,18 @@
                 <div class="image-preview-box">
                     <div class="scanning-line" id="scanLine"></div>
                     <img id="imagePreview" src="" alt="Uploaded Furniture">
+                    <!-- Model Viewer for Step 2 -->
+                    <model-viewer 
+                        id="modelViewerStep2"
+                        src="assets/model.glb" 
+                        ios-src="assets/model.usdz"
+                        alt="3D model of furniture"
+                        ar
+                        ar-modes="scene-viewer webxr quick-look" 
+                        camera-controls 
+                        shadow-intensity="1"
+                        style="width: 100%; height: 100%; background-color: #fafafa; display: none; position: absolute; top: 0; left: 0;">
+                    </model-viewer>
                 </div>
                 
                 <div class="ai-status">
@@ -941,18 +953,8 @@
                         </div>
                         <div class="mock-content">
                             <div class="mock-image">
-                                <!-- Replaced static image with Model Viewer -->
-                                <model-viewer 
-                                    id="arModelViewer"
-                                    src="assets/model.glb" 
-                                    ios-src="assets/model.usdz"
-                                    alt="A 3D model of an astronaut"
-                                    ar
-                                    ar-modes="scene-viewer webxr quick-look" 
-                                    camera-controls 
-                                    shadow-intensity="1"
-                                    style="width: 100%; height: 100%; background-color: #fafafa;">
-                                </model-viewer>
+                                <!-- Placeholder for mock product image -->
+                                <img id="mockProductImage" src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Mock Product Image" style="max-width: 100%; max-height: 100%; object-fit: contain;">
                             </div>
                             <div class="mock-details">
                                 <div class="mock-brand">PREMIUM COLLECTION</div>
@@ -963,7 +965,7 @@
                                 </div>
                                 
                                 <!-- Modern 2025 AR Button -->
-                                <button class="ar-btn-modern" onclick="document.getElementById('arModelViewer').activateAR()">
+                                <button class="ar-btn-modern" onclick="document.getElementById('modelViewerStep2').activateAR()">
                                     <div class="ar-icon-box">
                                         <span style="font-size: 14px;">⚡</span>
                                     </div>
@@ -1164,11 +1166,18 @@
             }
         };
 
+        // State
+        let currentStep = 1;
+        let uploadedImageSrc = null;
+        let qrCodeObj = null;
+        let currentLang = 'en'; // Default
+
         // Elements
         const progressBar = document.getElementById('progressBar');
         const dropZone = document.getElementById('dropZone');
         const fileInput = document.getElementById('fileInput');
         const imagePreview = document.getElementById('imagePreview');
+        const modelViewerStep2 = document.getElementById('modelViewerStep2'); // NEW
         const scanLine = document.getElementById('scanLine');
         const aiStatusText = document.getElementById('aiStatusText');
         const aiLoader = document.getElementById('aiLoader');
@@ -1275,7 +1284,13 @@
         }
 
         function useSampleImage() {
-            uploadedImageSrc = "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
+            // WARNING: Direct access to local file paths like this is generally blocked by browsers
+            // due to security restrictions (Cross-Origin policy).
+            // This will only work if the image is served from the same origin as the HTML file,
+            // or if the user manually selects the file using the input.
+            // For a functional demo with a "local sample", consider placing it in 'assets/'
+            // and referencing it as a relative path, or providing a base64 encoded image.
+            uploadedImageSrc = "assets/sofa-dl-welur.jpg"; 
             nextStep(2);
             simulateAI();
         }
@@ -1313,6 +1328,8 @@
         // AI Simulation Logic
         function simulateAI() {
             imagePreview.src = uploadedImageSrc;
+            imagePreview.style.display = 'block'; // Ensure image is visible initially
+            modelViewerStep2.style.display = 'none'; // Hide model viewer initially
             
             // Reset UI for Step 2
             scanLine.style.display = 'block';
@@ -1333,8 +1350,9 @@
             setTimeout(() => {
                 scanLine.style.display = 'none';
                 aiLoader.style.display = 'none';
-                modelPlaceholder.style.display = 'block'; // Show 3D cube
-                imagePreview.style.opacity = '0.3'; // Dim original image
+                modelPlaceholder.style.display = 'none'; // Hide placeholder cube
+                imagePreview.style.display = 'none'; // Hide original image
+                modelViewerStep2.style.display = 'block'; // Show 3D model viewer
                 aiStatusText.innerText = getTrans('aiComplete');
                 step2Next.disabled = false;
             }, 4500);
@@ -1356,7 +1374,8 @@
 
         // Update the mock view in Step 4
         function updateMockView() {
-            // document.getElementById('mockProductImage').src = uploadedImageSrc; // Element removed
+            // Using a placeholder image for the mock product in Step 4, as the model viewer is now in Step 2.
+            document.getElementById('mockProductImage').src = "assets/model.glb"; // Use glb as a placeholder for 2D image
             document.getElementById('mockProductTitle').innerText = document.getElementById('productName').value;
             document.getElementById('mockProductPrice').innerText = document.getElementById('price').value;
         }
