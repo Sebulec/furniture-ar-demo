@@ -132,31 +132,37 @@
     </model-viewer>
 
     <script>
-        const modelViewer = document.querySelector('model-viewer');
-        const errorMessage = document.getElementById('error-message');
+        // CRITICAL: Auto-detect iOS and redirect to USDZ for AR Quick Look
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
-        // Handle Progress
-        modelViewer.addEventListener('progress', (e) => {
-            const bar = document.querySelector('.update-bar');
-            bar.style.width = `${e.detail.totalProgress * 100}%`;
-        });
+        if (isIOS) {
+            // For iOS devices, redirect directly to the USDZ file
+            // This triggers AR Quick Look automatically
+            window.location.href = "assets/model.usdz";
+        } else {
+            // For non-iOS devices (Android, Desktop), use model-viewer
+            const modelViewer = document.querySelector('model-viewer');
+            const errorMessage = document.getElementById('error-message');
 
-        // Hide progress when loaded
-        modelViewer.addEventListener('load', () => {
-            const bar = document.querySelector('.progress-bar');
-            bar.classList.add('hide');
-        });
+            // Handle Progress
+            modelViewer.addEventListener('progress', (e) => {
+                const bar = document.querySelector('.update-bar');
+                bar.style.width = `${e.detail.totalProgress * 100}%`;
+            });
 
-        // Error Handling
-        modelViewer.addEventListener('error', (e) => {
-            console.error('Model Viewer Error:', e);
-            errorMessage.textContent = "Error loading model. Please check file format or connection.";
-            errorMessage.style.display = 'block';
-        });
+            // Hide progress when loaded
+            modelViewer.addEventListener('load', () => {
+                const bar = document.querySelector('.progress-bar');
+                bar.classList.add('hide');
+            });
 
-        // Direct QuickLook Fallback logic for iOS
-        // If the user taps the button, it triggers the built-in AR behavior.
-        // There is no automatic "on load" AR trigger allowed by iOS Safari/Chrome.
+            // Error Handling
+            modelViewer.addEventListener('error', (e) => {
+                console.error('Model Viewer Error:', e);
+                errorMessage.textContent = "Error loading model. Please check file format or connection.";
+                errorMessage.style.display = 'block';
+            });
+        }
     </script>
 </body>
 </html>
