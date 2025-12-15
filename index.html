@@ -289,10 +289,10 @@
 
         @media (min-width: 600px) {
             .form-grid {
-                grid-template-columns: 1fr 1fr;
+                grid-template-columns: 1fr 1fr 1fr;
             }
             .full-width {
-                grid-column: span 2;
+                grid-column: span 3;
             }
         }
 
@@ -807,14 +807,14 @@
                     <div class="scanning-line" id="scanLine"></div>
                     <img id="imagePreview" src="" alt="Uploaded Furniture">
                     <!-- Model Viewer for Step 2 -->
-                    <model-viewer 
+                    <model-viewer
                         id="modelViewerStep2"
-                        src="assets/model.glb" 
-                        ios-src="assets/model.usdz"
+                        src="assets/model.glb"
+                        ios-src="assets/model.glb"
                         alt="3D model of furniture"
                         ar
-                        ar-modes="scene-viewer webxr quick-look" 
-                        camera-controls 
+                        ar-modes="scene-viewer webxr quick-look"
+                        camera-controls
                         shadow-intensity="1"
                         style="width: 100%; height: 100%; background-color: #fafafa; display: none; position: absolute; top: 0; left: 0;">
                     </model-viewer>
@@ -850,17 +850,14 @@
         <!-- Step 3: Product Details -->
         <section id="step3" class="step-section card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <h2 data-i18n="step3Title">Step 3: Product Details</h2>
+                <h2 data-i18n="step3Title">Step 3: Product Dimensions</h2>
                 <button class="sample-btn" onclick="fillSampleData()" data-i18n="fillSampleBtn">Fill Sample Data</button>
             </div>
-            
+
+            <p style="margin-bottom: 1.5rem; color: #666;" data-i18n="step3Desc">Enter the physical dimensions of the furniture piece for accurate AR scaling.</p>
+
             <form id="productForm" onsubmit="event.preventDefault(); nextStep(4);">
                 <div class="form-grid">
-                    <div class="form-group full-width">
-                        <label for="productName" data-i18n="prodNameLabel">Product Name *</label>
-                        <input type="text" id="productName" placeholder="e.g. Modern Gray Sofa" required>
-                    </div>
-
                     <div class="form-group">
                         <label for="width" data-i18n="widthLabel">Width (cm) *</label>
                         <input type="number" id="width" min="1" step="0.1" placeholder="e.g. 240" required>
@@ -874,21 +871,6 @@
                     <div class="form-group">
                         <label for="depth" data-i18n="depthLabel">Depth (cm) *</label>
                         <input type="number" id="depth" min="1" step="0.1" placeholder="e.g. 95" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="seatHeight" data-i18n="seatHeightLabel">Seat Height (cm)</label>
-                        <input type="number" id="seatHeight" min="1" step="0.1" placeholder="Optional">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="price" data-i18n="priceLabel">Price (Currency) *</label>
-                        <input type="number" id="price" min="0" step="0.01" placeholder="e.g. 2499" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="productUrl" data-i18n="prodUrlLabel">Product Page URL</label>
-                        <input type="url" id="productUrl" placeholder="https://..." required>
                     </div>
                 </div>
 
@@ -1045,7 +1027,7 @@
                 headerSubtitle: "Pilot Demo - Turn Product Photos into AR",
                 step1Label: "Upload",
                 step2Label: "Generate",
-                step3Label: "Details",
+                step3Label: "Dimensions",
                 step4Label: "Done",
                 step1Title: "Step 1: Upload Product Photo",
                 step1Desc: "Upload a clear photo of the furniture piece. Best results with a white background.",
@@ -1062,7 +1044,8 @@
                 modelSim: "(Simulation using local placeholder)",
                 backBtn: "Back",
                 continueBtn: "Continue to Details",
-                step3Title: "Step 3: Product Details",
+                step3Title: "Step 3: Product Dimensions",
+                step3Desc: "Enter the physical dimensions of the furniture piece for accurate AR scaling.",
                 fillSampleBtn: "Fill Sample Data",
                 prodNameLabel: "Product Name *",
                 widthLabel: "Width (cm) *",
@@ -1107,7 +1090,7 @@
                 headerSubtitle: "Pilot Demo - Zamień zdjęcia produktów w AR",
                 step1Label: "Wgraj",
                 step2Label: "Generuj",
-                step3Label: "Szczegóły",
+                step3Label: "Wymiary",
                 step4Label: "Gotowe",
                 step1Title: "Krok 1: Wgraj zdjęcie produktu",
                 step1Desc: "Wgraj wyraźne zdjęcie mebla. Najlepsze wyniki na białym tle.",
@@ -1124,7 +1107,8 @@
                 modelSim: "(Symulacja przy użyciu lokalnego symbolu zastępczego)",
                 backBtn: "Wstecz",
                 continueBtn: "Przejdź do szczegółów",
-                step3Title: "Krok 3: Szczegóły produktu",
+                step3Title: "Krok 3: Wymiary produktu",
+                step3Desc: "Wprowadź fizyczne wymiary mebla, aby zapewnić dokładne skalowanie AR.",
                 fillSampleBtn: "Wypełnij przykładowymi danymi",
                 prodNameLabel: "Nazwa produktu *",
                 widthLabel: "Szerokość (cm) *",
@@ -1349,37 +1333,47 @@
 
         // Form Logic
         function fillSampleData() {
-            document.getElementById('productName').value = "Modern Gray Sofa";
             document.getElementById('width').value = 240;
             document.getElementById('height').value = 85;
             document.getElementById('depth').value = 95;
-            document.getElementById('seatHeight').value = 42;
-            document.getElementById('price').value = 2499;
-            
-            // Dynamic URL generation for the AR asset
-            const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
-            document.getElementById('productUrl').value = path + "/viewer.html";
         }
 
         // Update the mock view in Step 4
         function updateMockView() {
             // Using the static sample image for the mock preview
-            document.getElementById('mockProductImage').src = "assets/sofa-dl-welur.jpg"; 
-            document.getElementById('mockProductTitle').innerText = document.getElementById('productName').value;
-            document.getElementById('mockProductPrice').innerText = document.getElementById('price').value;
+            document.getElementById('mockProductImage').src = "assets/sofa-dl-welur.jpg";
+
+            // Auto-generate product name based on dimensions
+            const w = document.getElementById('width').value;
+            const h = document.getElementById('height').value;
+            const d = document.getElementById('depth').value;
+            const productName = `Furniture Item ${w}×${h}×${d}cm`;
+
+            document.getElementById('mockProductTitle').innerText = productName;
+            document.getElementById('mockProductPrice').innerText = "$0.00"; // Default price
         }
 
         // QR Code Generation
         function generateQRCode() {
+            // Auto-generate product name and URL
+            const w = document.getElementById('width').value;
+            const h = document.getElementById('height').value;
+            const d = document.getElementById('depth').value;
+            const productName = `Furniture Item ${w}×${h}×${d}cm`;
+
+            // Dynamic URL generation for the AR asset
+            const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+            const productUrl = path + "/viewer.html";
+
             const product = {
                 id: 'PROD-' + Math.floor(Math.random() * 10000),
-                name: document.getElementById('productName').value,
+                name: productName,
                 dims: {
-                    w: document.getElementById('width').value,
-                    h: document.getElementById('height').value,
-                    d: document.getElementById('depth').value
+                    w: w,
+                    h: h,
+                    d: d
                 },
-                url: document.getElementById('productUrl').value
+                url: productUrl
             };
 
             // Display Summary
@@ -1387,8 +1381,7 @@
             summaryList.innerHTML = `
                 <li>ID: ${product.id}</li>
                 <li>Name: ${product.name}</li>
-                <li>Dimensions: ${product.dims.w}x${product.dims.h}x${product.dims.d} cm</li>
-                <li>Price: ${document.getElementById('price').value}</li>
+                <li>Dimensions: ${product.dims.w}×${product.dims.h}×${product.dims.d} cm</li>
             `;
 
             document.getElementById('resultName').innerText = product.name;
@@ -1522,7 +1515,7 @@
             // 9. Draw Footer Info
             ctx.fillStyle = '#333333';
             ctx.font = 'bold 32px -apple-system, sans-serif';
-            const productName = document.getElementById('productName').value || "Product";
+            const productName = document.getElementById('resultName').innerText || "Product";
             ctx.fillText(productName, width / 2, 660);
 
             ctx.fillStyle = '#888888';

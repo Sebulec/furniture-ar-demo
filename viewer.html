@@ -105,13 +105,13 @@
 
     <div id="error-message"></div>
 
-    <model-viewer 
-        src="assets/model.glb" 
-        ios-src="assets/model.usdz"
+    <model-viewer
+        src="assets/model.glb"
+        ios-src="assets/model.glb"
         alt="AR Model"
-        ar 
-        ar-modes="quick-look webxr scene-viewer" 
-        camera-controls 
+        ar
+        ar-modes="scene-viewer webxr quick-look"
+        camera-controls
         shadow-intensity="1"
         autoplay
         auto-rotate
@@ -132,37 +132,33 @@
     </model-viewer>
 
     <script>
-        // CRITICAL: Auto-detect iOS and redirect to USDZ for AR Quick Look
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        // Universal GLB support for iOS 12+ and Android via model-viewer
+        const modelViewer = document.querySelector('model-viewer');
+        const errorMessage = document.getElementById('error-message');
 
-        if (isIOS) {
-            // For iOS devices, redirect directly to the USDZ file
-            // This triggers AR Quick Look automatically
-            window.location.href = "assets/model.usdz";
-        } else {
-            // For non-iOS devices (Android, Desktop), use model-viewer
-            const modelViewer = document.querySelector('model-viewer');
-            const errorMessage = document.getElementById('error-message');
+        // Handle Progress
+        modelViewer.addEventListener('progress', (e) => {
+            const bar = document.querySelector('.update-bar');
+            bar.style.width = `${e.detail.totalProgress * 100}%`;
+        });
 
-            // Handle Progress
-            modelViewer.addEventListener('progress', (e) => {
-                const bar = document.querySelector('.update-bar');
-                bar.style.width = `${e.detail.totalProgress * 100}%`;
-            });
+        // Hide progress when loaded
+        modelViewer.addEventListener('load', () => {
+            const bar = document.querySelector('.progress-bar');
+            bar.classList.add('hide');
+        });
 
-            // Hide progress when loaded
-            modelViewer.addEventListener('load', () => {
-                const bar = document.querySelector('.progress-bar');
-                bar.classList.add('hide');
-            });
+        // Error Handling
+        modelViewer.addEventListener('error', (e) => {
+            console.error('Model Viewer Error:', e);
+            errorMessage.textContent = "Error loading model. Please check file format or connection.";
+            errorMessage.style.display = 'block';
+        });
 
-            // Error Handling
-            modelViewer.addEventListener('error', (e) => {
-                console.error('Model Viewer Error:', e);
-                errorMessage.textContent = "Error loading model. Please check file format or connection.";
-                errorMessage.style.display = 'block';
-            });
-        }
+        // AR availability detection
+        modelViewer.addEventListener('ar-status', (e) => {
+            console.log('AR Status:', e.detail.available ? 'Available' : 'Not Available');
+        });
     </script>
 </body>
 </html>

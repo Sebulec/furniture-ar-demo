@@ -1,0 +1,7 @@
+# 3D Model Resizer Dependencies
+trimesh>=4.0.0
+numpy>=1.24.0
+pillow>=10.0.0
+
+# Optional: For full USDZ support (may require system dependencies)
+# usd-core>=23.11
