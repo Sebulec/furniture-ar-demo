@@ -3,45 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR Viewer</title>
+    <title>AR Quick Look</title>
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
     <style>
-        body { margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; background-color: #f5f5f5; font-family: sans-serif; }
-        model-viewer { width: 100%; height: 100%; }
+        body { 
+            margin: 0; 
+            padding: 0; 
+            width: 100vw; 
+            height: 100vh; 
+            overflow: hidden; 
+            background-color: #f5f5f5; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        model-viewer { 
+            width: 100%; 
+            height: 100%; 
+            --poster-color: transparent;
+        }
+
+        /* Custom AR Button */
         .ar-button {
-            background-color: white;
-            border-radius: 20px;
-            border: none;
             position: absolute;
-            bottom: 30px;
+            bottom: 40px;
             left: 50%;
             transform: translateX(-50%);
-            padding: 10px 20px;
+            background-color: #0071e3; /* iOS Blue */
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 12px 24px;
+            font-size: 16px;
             font-weight: 600;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            color: #333;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             cursor: pointer;
+            z-index: 100;
+            transition: transform 0.2s;
+        }
+
+        .ar-button:active {
+            transform: translateX(-50%) scale(0.95);
+        }
+
+        .ar-button svg {
+            width: 20px;
+            height: 20px;
+            fill: white;
+        }
+
+        /* Loading Bar */
+        .progress-bar {
+            display: block;
+            width: 33%;
+            height: 10%;
+            max-height: 2%;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 25px;
+            box-shadow: 0px 3px 10px 3px rgba(0, 0, 0, 0.5), 0px 0px 5px 1px rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .progress-bar.hide {
+            visibility: hidden;
+            transition: visibility 0.3s;
+        }
+
+        .update-bar {
+            background-color: rgba(255, 255, 255, 0.9);
+            width: 0%;
+            height: 100%;
+            border-radius: 25px;
+            float: left;
+            transition: width 0.3s;
+        }
+
+        /* Error Message */
+        #error-message {
+            display: none;
+            position: absolute;
+            top: 20px;
+            background: rgba(255, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            z-index: 200;
         }
     </style>
 </head>
 <body>
+
+    <div id="error-message"></div>
+
     <model-viewer 
         src="assets/model.glb" 
         ios-src="assets/model.usdz"
         alt="AR Model"
         ar 
-        ar-modes="scene-viewer webxr quick-look" 
+        ar-modes="quick-look webxr scene-viewer" 
         camera-controls 
         shadow-intensity="1"
         autoplay
         auto-rotate
     >
+        <!-- iOS Style AR Button -->
         <button slot="ar-button" class="ar-button">
-            <span>📦</span> View in your space
+            <svg viewBox="0 0 24 24">
+                <path d="M3 3h18v18H3V3zm16 16V5H5v14h14zM12 7l4 4-1.41 1.41L13 10.83v6.34h-2v-6.34l-1.59 1.58L8 11l4-4z"/>
+            </svg>
+            View in AR
         </button>
+
+        <!-- Loading Progress -->
+        <div class="progress-bar" slot="progress-bar">
+            <div class="update-bar"></div>
+        </div>
+
     </model-viewer>
+
+    <script>
+        const modelViewer = document.querySelector('model-viewer');
+        const errorMessage = document.getElementById('error-message');
+
+        // Handle Progress
+        modelViewer.addEventListener('progress', (e) => {
+            const bar = document.querySelector('.update-bar');
+            bar.style.width = `${e.detail.totalProgress * 100}%`;
+        });
+
+        // Hide progress when loaded
+        modelViewer.addEventListener('load', () => {
+            const bar = document.querySelector('.progress-bar');
+            bar.classList.add('hide');
+        });
+
+        // Error Handling
+        modelViewer.addEventListener('error', (e) => {
+            console.error('Model Viewer Error:', e);
+            errorMessage.textContent = "Error loading model. Please check file format or connection.";
+            errorMessage.style.display = 'block';
+        });
+
+        // Direct QuickLook Fallback logic for iOS
+        // If the user taps the button, it triggers the built-in AR behavior.
+        // There is no automatic "on load" AR trigger allowed by iOS Safari/Chrome.
+    </script>
 </body>
 </html>
