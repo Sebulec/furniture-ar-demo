@@ -142,35 +142,40 @@
             display: none;
         }
 
-        /* Debug Info */
-        .debug-info {
+        /* Language Switcher */
+        .lang-switch {
             position: absolute;
-            top: 60px;
-            left: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.7);
-            color: #0f0;
-            padding: 10px;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 11px;
-            z-index: 400;
-            max-height: 200px;
-            overflow-y: auto;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #333;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 600;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.2s;
         }
 
-        .debug-info.hidden {
-            display: none;
+        .lang-switch:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: scale(1.05);
         }
+
     </style>
 </head>
 <body>
 
+    <button class="lang-switch" onclick="toggleLanguage()" id="langSwitchBtn">PL</button>
+
     <div id="error-message"></div>
     <div class="ar-instructions" id="arInstructions">
-        👆 Tap "View in AR" button below to launch AR experience
+        <span id="instructionText">👇 Tap "View in AR" button below to launch AR experience</span>
     </div>
-    <div class="debug-info" id="debugInfo"></div>
 
     <model-viewer
         src="assets/model.glb"
@@ -183,6 +188,10 @@
         auto-rotate
         ar-scale="auto"
         ar-placement="floor"
+        exposure="1"
+        environment-image="neutral"
+        skybox-image="neutral"
+        tone-mapping="commerce"
     >
         <!-- Loading Progress -->
         <div class="progress-bar" slot="progress-bar">
@@ -200,28 +209,68 @@
     </button>
 
     <script>
+        // Language Support
+        let currentLang = 'en';
+
+        const translations = {
+            en: {
+                instruction: '👇 Tap "View in AR" button below to launch AR experience',
+                viewInAr: 'View in AR',
+                launching: 'Launching...',
+                openingAr: 'Opening AR...',
+                arLaunched: 'AR Launched!',
+                arNotAvailable: 'AR Not Available',
+                error: 'Error',
+                errorArNotAvailable: 'AR is not available on this device or browser. Make sure you\'re using HTTPS and a supported browser.',
+                errorLoading: 'Error loading model. Please check file format or connection.',
+                errorLaunching: 'Error launching AR'
+            },
+            pl: {
+                instruction: '👇 Dotknij przycisku "Zobacz w AR" poniżej, aby uruchomić AR',
+                viewInAr: 'Zobacz w AR',
+                launching: 'Uruchamianie...',
+                openingAr: 'Otwieranie AR...',
+                arLaunched: 'AR uruchomione!',
+                arNotAvailable: 'AR niedostępne',
+                error: 'Błąd',
+                errorArNotAvailable: 'AR nie jest dostępne na tym urządzeniu lub przeglądarce. Upewnij się, że używasz HTTPS i obsługiwanej przeglądarki.',
+                errorLoading: 'Błąd ładowania modelu. Sprawdź format pliku lub połączenie.',
+                errorLaunching: 'Błąd uruchamiania AR'
+            }
+        };
+
+        function detectAndSetLanguage() {
+            const userLang = navigator.language || navigator.userLanguage;
+            const langCode = userLang.substring(0, 2).toLowerCase();
+            setLanguage(langCode === 'pl' ? 'pl' : 'en');
+        }
+
+        function toggleLanguage() {
+            const newLang = currentLang === 'en' ? 'pl' : 'en';
+            setLanguage(newLang);
+        }
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            const t = translations[lang];
+
+            document.getElementById('langSwitchBtn').innerText = lang === 'en' ? 'PL' : 'EN';
+            document.getElementById('instructionText').innerText = t.instruction;
+            document.getElementById('buttonText').innerText = t.viewInAr;
+        }
+
+        function getTrans(key) {
+            return translations[currentLang][key] || key;
+        }
+
+        // Initialize language
+        detectAndSetLanguage();
+
         // Universal GLB support for iOS 12+ and Android via model-viewer
         const modelViewer = document.querySelector('model-viewer');
         const errorMessage = document.getElementById('error-message');
         const arInstructions = document.getElementById('arInstructions');
         const customArButton = document.getElementById('customArButton');
-        const debugInfo = document.getElementById('debugInfo');
-
-        // Show debug info
-        function updateDebugInfo() {
-            const info = {
-                'Protocol': window.location.protocol,
-                'HTTPS': window.location.protocol === 'https:' ? '✅' : '❌ REQUIRED!',
-                'User Agent': navigator.userAgent.substring(0, 50) + '...',
-                'Model Loaded': modelViewer.loaded ? '✅' : '❌',
-                'Can Activate AR': modelViewer.canActivateAR ? '✅' : '❌',
-                'AR Modes': modelViewer.arModes || 'none'
-            };
-
-            debugInfo.innerHTML = Object.entries(info)
-                .map(([key, value]) => `${key}: ${value}`)
-                .join('<br>');
-        }
 
         // Handle Progress
         modelViewer.addEventListener('progress', (e) => {
@@ -234,9 +283,6 @@
             const bar = document.querySelector('.progress-bar');
             bar.classList.add('hide');
 
-            // Update debug info
-            updateDebugInfo();
-
             // Hide instructions after 5 seconds
             setTimeout(() => {
                 arInstructions.classList.add('hidden');
@@ -244,13 +290,9 @@
 
             // Check if AR can be activated
             setTimeout(() => {
-                console.log('Can activate AR?', modelViewer.canActivateAR);
-                updateDebugInfo(); // Update again after AR status is known
-
                 if (!modelViewer.canActivateAR) {
                     customArButton.style.opacity = '0.5';
                     customArButton.style.cursor = 'not-allowed';
-                    console.warn('AR not available on this device');
                 }
             }, 1000);
         });
@@ -258,7 +300,7 @@
         // Error Handling
         modelViewer.addEventListener('error', (e) => {
             console.error('Model Viewer Error:', e);
-            errorMessage.textContent = "Error loading model. Please check file format or connection.";
+            errorMessage.textContent = getTrans('errorLoading');
             errorMessage.style.display = 'block';
             arInstructions.classList.add('hidden');
         });
@@ -269,7 +311,7 @@
             console.log('AR Status:', available ? 'Available ✅' : 'Not Available ❌');
 
             if (!available) {
-                errorMessage.textContent = "AR not available on this device";
+                errorMessage.textContent = getTrans('errorArNotAvailable');
                 errorMessage.style.display = 'block';
                 arInstructions.classList.add('hidden');
             }
@@ -285,7 +327,7 @@
             e.stopImmediatePropagation();
 
             const buttonText = document.getElementById('buttonText');
-            buttonText.textContent = 'Launching...';
+            buttonText.textContent = getTrans('launching');
 
             console.log('🚀 AR Button Clicked!');
             console.log('📱 iOS Device:', isIOS);
@@ -313,7 +355,7 @@
                         if (nativeArButton && !nativeArButton.classList.contains('hide')) {
                             console.log('🔘 Found native AR button, clicking it');
                             nativeArButton.click();
-                            buttonText.textContent = 'Opening AR...';
+                            buttonText.textContent = getTrans('openingAr');
                             return;
                         }
                     }
@@ -322,45 +364,32 @@
                     const result = await modelViewer.activateAR();
                     console.log('✅ AR Activated! Result:', result);
 
-                    buttonText.textContent = 'AR Launched!';
+                    buttonText.textContent = getTrans('arLaunched');
                 } else {
                     console.error('❌ AR not available. Debug info:');
                     console.log('- Browser:', navigator.userAgent);
                     console.log('- HTTPS:', window.location.protocol === 'https:');
                     console.log('- AR Modes:', modelViewer.arModes);
 
-                    errorMessage.textContent = "AR is not available on this device or browser.";
+                    errorMessage.textContent = getTrans('errorArNotAvailable');
                     errorMessage.style.display = 'block';
-                    buttonText.textContent = 'AR Not Available';
+                    buttonText.textContent = getTrans('arNotAvailable');
                 }
             } catch (error) {
                 console.error('❌ Error activating AR:', error);
                 console.error('Error stack:', error.stack);
 
-                errorMessage.textContent = "Error launching AR: " + error.message;
+                errorMessage.textContent = getTrans('errorLaunching') + ': ' + error.message;
                 errorMessage.style.display = 'block';
-                buttonText.textContent = 'Error';
+                buttonText.textContent = getTrans('error');
             }
 
             // Reset button text after 2 seconds
             setTimeout(() => {
-                buttonText.textContent = 'View in AR';
+                buttonText.textContent = getTrans('viewInAr');
             }, 2000);
         }, { capture: true });
 
-        // Debug: Log when model-viewer is ready
-        console.log('Model Viewer initialized:', modelViewer);
-        console.log('Model src:', modelViewer.src);
-        console.log('iOS src:', modelViewer.getAttribute('ios-src'));
-        console.log('AR modes:', modelViewer.arModes);
-
-        // Initial debug info
-        setTimeout(updateDebugInfo, 500);
-
-        // Double-tap debug info to hide it
-        debugInfo.addEventListener('dblclick', () => {
-            debugInfo.classList.toggle('hidden');
-        });
     </script>
 </body>
 </html>
