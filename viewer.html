@@ -174,15 +174,15 @@
 
     <model-viewer
         src="assets/model.glb"
-        ios-src="assets/model.glb"
         alt="AR Model"
         ar
-        ar-modes="scene-viewer webxr quick-look"
+        ar-modes="webxr scene-viewer quick-look"
         camera-controls
         shadow-intensity="1"
         autoplay
         auto-rotate
         ar-scale="auto"
+        ar-placement="floor"
     >
         <!-- Loading Progress -->
         <div class="progress-bar" slot="progress-bar">
@@ -192,11 +192,11 @@
     </model-viewer>
 
     <!-- Custom AR Button (always visible) -->
-    <button class="ar-button" id="customArButton">
+    <button type="button" class="ar-button" id="customArButton">
         <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: white;">
             <path d="M3 3h18v18H3V3zm16 16V5H5v14h14zM12 7l4 4-1.41 1.41L13 10.83v6.34h-2v-6.34l-1.59 1.58L8 11l4-4z"/>
         </svg>
-        View in AR
+        <span id="buttonText">View in AR</span>
     </button>
 
     <script>
@@ -275,40 +275,78 @@
             }
         });
 
+        // Detect iOS
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
         // Custom AR button click handler
         customArButton.addEventListener('click', async (e) => {
             e.preventDefault();
             e.stopPropagation();
+            e.stopImmediatePropagation();
 
-            console.log('AR Button Clicked! Launching AR...');
-            console.log('canActivateAR:', modelViewer.canActivateAR);
-            console.log('Model loaded:', modelViewer.loaded);
+            const buttonText = document.getElementById('buttonText');
+            buttonText.textContent = 'Launching...';
+
+            console.log('🚀 AR Button Clicked!');
+            console.log('📱 iOS Device:', isIOS);
+            console.log('📊 canActivateAR:', modelViewer.canActivateAR);
+            console.log('📦 Model loaded:', modelViewer.loaded);
+            console.log('🎯 Model src:', modelViewer.src);
 
             arInstructions.classList.add('hidden');
 
             try {
                 // Wait for model to be ready
                 await modelViewer.updateComplete;
+                console.log('✅ Model update complete');
 
                 // Trigger AR session
                 if (modelViewer.canActivateAR) {
-                    console.log('Activating AR...');
-                    await modelViewer.activateAR();
+                    console.log('🎨 Activating AR NOW...');
+
+                    // For iOS, try to trigger the native AR button if our custom one fails
+                    if (isIOS) {
+                        console.log('📱 iOS detected - using special activation');
+
+                        // Try to find and click the native AR button
+                        const nativeArButton = modelViewer.shadowRoot?.querySelector('#default-ar-button');
+                        if (nativeArButton && !nativeArButton.classList.contains('hide')) {
+                            console.log('🔘 Found native AR button, clicking it');
+                            nativeArButton.click();
+                            buttonText.textContent = 'Opening AR...';
+                            return;
+                        }
+                    }
+
+                    // Call activateAR
+                    const result = await modelViewer.activateAR();
+                    console.log('✅ AR Activated! Result:', result);
+
+                    buttonText.textContent = 'AR Launched!';
                 } else {
-                    console.error('AR not available. Reasons:');
+                    console.error('❌ AR not available. Debug info:');
                     console.log('- Browser:', navigator.userAgent);
                     console.log('- HTTPS:', window.location.protocol === 'https:');
                     console.log('- AR Modes:', modelViewer.arModes);
 
-                    errorMessage.textContent = "AR is not available on this device or browser. Make sure you're using HTTPS and a supported browser.";
+                    errorMessage.textContent = "AR is not available on this device or browser.";
                     errorMessage.style.display = 'block';
+                    buttonText.textContent = 'AR Not Available';
                 }
             } catch (error) {
-                console.error('Error activating AR:', error);
+                console.error('❌ Error activating AR:', error);
+                console.error('Error stack:', error.stack);
+
                 errorMessage.textContent = "Error launching AR: " + error.message;
                 errorMessage.style.display = 'block';
+                buttonText.textContent = 'Error';
             }
-        });
+
+            // Reset button text after 2 seconds
+            setTimeout(() => {
+                buttonText.textContent = 'View in AR';
+            }, 2000);
+        }, { capture: true });
 
         // Debug: Log when model-viewer is ready
         console.log('Model Viewer initialized:', modelViewer);
