@@ -141,6 +141,27 @@
         .ar-instructions.hidden {
             display: none;
         }
+
+        /* Debug Info */
+        .debug-info {
+            position: absolute;
+            top: 60px;
+            left: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #0f0;
+            padding: 10px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 11px;
+            z-index: 400;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .debug-info.hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -149,6 +170,7 @@
     <div class="ar-instructions" id="arInstructions">
         👆 Tap "View in AR" button below to launch AR experience
     </div>
+    <div class="debug-info" id="debugInfo"></div>
 
     <model-viewer
         src="assets/model.glb"
@@ -183,6 +205,23 @@
         const errorMessage = document.getElementById('error-message');
         const arInstructions = document.getElementById('arInstructions');
         const customArButton = document.getElementById('customArButton');
+        const debugInfo = document.getElementById('debugInfo');
+
+        // Show debug info
+        function updateDebugInfo() {
+            const info = {
+                'Protocol': window.location.protocol,
+                'HTTPS': window.location.protocol === 'https:' ? '✅' : '❌ REQUIRED!',
+                'User Agent': navigator.userAgent.substring(0, 50) + '...',
+                'Model Loaded': modelViewer.loaded ? '✅' : '❌',
+                'Can Activate AR': modelViewer.canActivateAR ? '✅' : '❌',
+                'AR Modes': modelViewer.arModes || 'none'
+            };
+
+            debugInfo.innerHTML = Object.entries(info)
+                .map(([key, value]) => `${key}: ${value}`)
+                .join('<br>');
+        }
 
         // Handle Progress
         modelViewer.addEventListener('progress', (e) => {
@@ -195,6 +234,9 @@
             const bar = document.querySelector('.progress-bar');
             bar.classList.add('hide');
 
+            // Update debug info
+            updateDebugInfo();
+
             // Hide instructions after 5 seconds
             setTimeout(() => {
                 arInstructions.classList.add('hidden');
@@ -203,6 +245,8 @@
             // Check if AR can be activated
             setTimeout(() => {
                 console.log('Can activate AR?', modelViewer.canActivateAR);
+                updateDebugInfo(); // Update again after AR status is known
+
                 if (!modelViewer.canActivateAR) {
                     customArButton.style.opacity = '0.5';
                     customArButton.style.cursor = 'not-allowed';
@@ -232,16 +276,36 @@
         });
 
         // Custom AR button click handler
-        customArButton.addEventListener('click', () => {
+        customArButton.addEventListener('click', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
             console.log('AR Button Clicked! Launching AR...');
+            console.log('canActivateAR:', modelViewer.canActivateAR);
+            console.log('Model loaded:', modelViewer.loaded);
+
             arInstructions.classList.add('hidden');
 
-            // Trigger AR session
-            if (modelViewer && modelViewer.canActivateAR) {
-                modelViewer.activateAR();
-            } else {
-                console.error('AR not available or model not ready');
-                errorMessage.textContent = "AR is not available on this device or browser";
+            try {
+                // Wait for model to be ready
+                await modelViewer.updateComplete;
+
+                // Trigger AR session
+                if (modelViewer.canActivateAR) {
+                    console.log('Activating AR...');
+                    await modelViewer.activateAR();
+                } else {
+                    console.error('AR not available. Reasons:');
+                    console.log('- Browser:', navigator.userAgent);
+                    console.log('- HTTPS:', window.location.protocol === 'https:');
+                    console.log('- AR Modes:', modelViewer.arModes);
+
+                    errorMessage.textContent = "AR is not available on this device or browser. Make sure you're using HTTPS and a supported browser.";
+                    errorMessage.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error activating AR:', error);
+                errorMessage.textContent = "Error launching AR: " + error.message;
                 errorMessage.style.display = 'block';
             }
         });
@@ -251,6 +315,14 @@
         console.log('Model src:', modelViewer.src);
         console.log('iOS src:', modelViewer.getAttribute('ios-src'));
         console.log('AR modes:', modelViewer.arModes);
+
+        // Initial debug info
+        setTimeout(updateDebugInfo, 500);
+
+        // Double-tap debug info to hide it
+        debugInfo.addEventListener('dblclick', () => {
+            debugInfo.classList.toggle('hidden');
+        });
     </script>
 </body>
 </html>
