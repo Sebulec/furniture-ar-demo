@@ -160,15 +160,8 @@
         shadow-intensity="1"
         autoplay
         auto-rotate
+        ar-scale="auto"
     >
-        <!-- iOS Style AR Button -->
-        <button slot="ar-button" class="ar-button">
-            <svg viewBox="0 0 24 24">
-                <path d="M3 3h18v18H3V3zm16 16V5H5v14h14zM12 7l4 4-1.41 1.41L13 10.83v6.34h-2v-6.34l-1.59 1.58L8 11l4-4z"/>
-            </svg>
-            View in AR
-        </button>
-
         <!-- Loading Progress -->
         <div class="progress-bar" slot="progress-bar">
             <div class="update-bar"></div>
@@ -176,11 +169,20 @@
 
     </model-viewer>
 
+    <!-- Custom AR Button (always visible) -->
+    <button class="ar-button" id="customArButton">
+        <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: white;">
+            <path d="M3 3h18v18H3V3zm16 16V5H5v14h14zM12 7l4 4-1.41 1.41L13 10.83v6.34h-2v-6.34l-1.59 1.58L8 11l4-4z"/>
+        </svg>
+        View in AR
+    </button>
+
     <script>
         // Universal GLB support for iOS 12+ and Android via model-viewer
         const modelViewer = document.querySelector('model-viewer');
         const errorMessage = document.getElementById('error-message');
         const arInstructions = document.getElementById('arInstructions');
+        const customArButton = document.getElementById('customArButton');
 
         // Handle Progress
         modelViewer.addEventListener('progress', (e) => {
@@ -197,6 +199,16 @@
             setTimeout(() => {
                 arInstructions.classList.add('hidden');
             }, 5000);
+
+            // Check if AR can be activated
+            setTimeout(() => {
+                console.log('Can activate AR?', modelViewer.canActivateAR);
+                if (!modelViewer.canActivateAR) {
+                    customArButton.style.opacity = '0.5';
+                    customArButton.style.cursor = 'not-allowed';
+                    console.warn('AR not available on this device');
+                }
+            }, 1000);
         });
 
         // Error Handling
@@ -219,14 +231,20 @@
             }
         });
 
-        // AR button click tracking
-        const arButton = document.querySelector('[slot="ar-button"]');
-        if (arButton) {
-            arButton.addEventListener('click', () => {
-                console.log('AR Button Clicked! Launching AR...');
-                arInstructions.classList.add('hidden');
-            });
-        }
+        // Custom AR button click handler
+        customArButton.addEventListener('click', () => {
+            console.log('AR Button Clicked! Launching AR...');
+            arInstructions.classList.add('hidden');
+
+            // Trigger AR session
+            if (modelViewer && modelViewer.canActivateAR) {
+                modelViewer.activateAR();
+            } else {
+                console.error('AR not available or model not ready');
+                errorMessage.textContent = "AR is not available on this device or browser";
+                errorMessage.style.display = 'block';
+            }
+        });
 
         // Debug: Log when model-viewer is ready
         console.log('Model Viewer initialized:', modelViewer);
