@@ -178,7 +178,7 @@
     </div>
 
     <model-viewer
-        src="assets/model.glb"
+        src=""
         alt="AR Model"
         ar
         ar-modes="scene-viewer webxr quick-look"
@@ -206,6 +206,59 @@
     </button>
 
     <script>
+        // --- Dynamic Model Loading & Analytics Setup ---
+
+        // 1. Get Model from URL (e.g., ?model=sofa-01.glb)
+        const params = new URLSearchParams(window.location.search);
+        // Default to 'model.glb' if no param is provided
+        const modelName = params.get('model') || 'model.glb';
+        const modelPath = `assets/${modelName}`;
+        
+        const modelViewer = document.querySelector('model-viewer');
+        // Set the src dynamically
+        modelViewer.src = modelPath;
+        console.log(`📂 Loading model: ${modelPath}`);
+
+        // 2. User Identification (Anonymous)
+        function getUserId() {
+            let userId = localStorage.getItem('ar_user_id');
+            if (!userId) {
+                userId = 'user_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+                localStorage.setItem('ar_user_id', userId);
+            }
+            return userId;
+        }
+        const userId = getUserId();
+
+        // 3. Analytics Helper
+        async function trackEvent(eventName, extraData = {}) {
+            const payload = {
+                event: eventName,
+                user_id: userId,
+                model: modelName,
+                timestamp: new Date().toISOString(),
+                ...extraData
+            };
+            console.log('📊 Tracking:', payload);
+
+            try {
+                // Send to Vercel Serverless Function
+                await fetch('/api/track', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            } catch (err) {
+                console.warn('Analytics failed to send:', err);
+            }
+        }
+
+        // Track Page View
+        trackEvent('view_page', { 
+            userAgent: navigator.userAgent,
+            referrer: document.referrer 
+        });
+
         // Language Support
         let currentLang = 'en';
 
@@ -325,6 +378,12 @@
 
             const buttonText = document.getElementById('buttonText');
             buttonText.textContent = getTrans('launching');
+
+            // Track AR Button Tap
+            trackEvent('click_ar_view', { 
+                ios: isIOS,
+                canActivate: modelViewer.canActivateAR 
+            });
 
             console.log('🚀 AR Button Clicked!');
             console.log('📱 iOS Device:', isIOS);
