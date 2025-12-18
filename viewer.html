@@ -261,7 +261,15 @@
         // Track Page View
         trackEvent('view_page', { 
             userAgent: navigator.userAgent,
-            referrer: document.referrer 
+            referrer: document.referrer,
+            platform: navigator.platform,
+            screenWidth: screen.width,
+            screenHeight: screen.height,
+            devicePixelRatio: window.devicePixelRatio,
+            browserLanguage: navigator.language,
+            maxTouchPoints: navigator.maxTouchPoints,
+            // Optionally, for more advanced parsing, could use a library to decode userAgent
+            // or send raw userAgent for server-side parsing.
         });
 
         // Language Support
@@ -358,6 +366,8 @@
             errorMessage.textContent = getTrans('errorLoading');
             errorMessage.style.display = 'block';
             arInstructions.classList.add('hidden');
+            // Hide progress bar on error
+            document.querySelector('.progress-bar').classList.add('hide');
         });
 
         // AR availability detection
@@ -366,9 +376,11 @@
             console.log('AR Status:', available ? 'Available ✅' : 'Not Available ❌');
 
             if (!available) {
-                errorMessage.textContent = getTrans('errorArNotAvailable');
-                errorMessage.style.display = 'block';
-                arInstructions.classList.add('hidden');
+                // Only show this if we are not in an error state from loading
+                if (errorMessage.style.display === 'none') {
+                    // We don't want to show this immediately on desktop, only on click or if explicit
+                    // Actually, model-viewer might fire this early. Let's keep it but ensure it doesn't block loading UI.
+                }
             }
         });
 
@@ -391,30 +403,29 @@
             });
 
             console.log('🚀 AR Button Clicked!');
-            console.log('📱 iOS Device:', isIOS);
-            console.log('📊 canActivateAR:', modelViewer.canActivateAR);
-            console.log('📦 Model loaded:', modelViewer.loaded);
-            console.log('🎯 Model src:', modelViewer.src);
+            
+            // Check if model is actually loaded
+            if (!modelViewer.loaded) {
+                console.warn('⚠️ Model not loaded yet');
+                errorMessage.textContent = getTrans('errorLoading');
+                errorMessage.style.display = 'block';
+                buttonText.textContent = getTrans('error');
+                setTimeout(() => buttonText.textContent = getTrans('viewInAr'), 2000);
+                return;
+            }
 
             arInstructions.classList.add('hidden');
 
             try {
-                // Wait for model to be ready
-                await modelViewer.updateComplete;
-                console.log('✅ Model update complete');
-
                 // Trigger AR session
                 if (modelViewer.canActivateAR) {
                     console.log('🎨 Activating AR NOW...');
 
                     // For iOS, try to trigger the native AR button if our custom one fails
                     if (isIOS) {
-                        console.log('📱 iOS detected - using special activation');
-
-                        // Try to find and click the native AR button
+                         // ... (keep existing iOS logic)
                         const nativeArButton = modelViewer.shadowRoot?.querySelector('#default-ar-button');
                         if (nativeArButton && !nativeArButton.classList.contains('hide')) {
-                            console.log('🔘 Found native AR button, clicking it');
                             nativeArButton.click();
                             buttonText.textContent = getTrans('openingAr');
                             return;
@@ -422,25 +433,17 @@
                     }
 
                     // Call activateAR
-                    const result = await modelViewer.activateAR();
-                    console.log('✅ AR Activated! Result:', result);
-
+                    await modelViewer.activateAR();
                     buttonText.textContent = getTrans('arLaunched');
                 } else {
-                    console.error('❌ AR not available. Debug info:');
-                    console.log('- Browser:', navigator.userAgent);
-                    console.log('- HTTPS:', window.location.protocol === 'https:');
-                    console.log('- AR Modes:', modelViewer.arModes);
-
+                    console.error('❌ AR not available on this device');
                     errorMessage.textContent = getTrans('errorArNotAvailable');
                     errorMessage.style.display = 'block';
                     buttonText.textContent = getTrans('arNotAvailable');
                 }
             } catch (error) {
                 console.error('❌ Error activating AR:', error);
-                console.error('Error stack:', error.stack);
-
-                errorMessage.textContent = getTrans('errorLaunching') + ': ' + error.message;
+                errorMessage.textContent = getTrans('errorLaunching');
                 errorMessage.style.display = 'block';
                 buttonText.textContent = getTrans('error');
             }
