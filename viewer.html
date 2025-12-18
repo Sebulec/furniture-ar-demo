@@ -212,7 +212,12 @@
         const params = new URLSearchParams(window.location.search);
         // Default to 'model.glb' if no param is provided
         const modelName = params.get('model') || 'model.glb';
-        const modelPath = `assets/${modelName}`;
+        
+        // REPLACE 'YOUR_PROJECT_ID' with your actual Supabase Project ID (found in Project Settings -> General)
+        const SUPABASE_PROJECT_ID = 'hdrizsefokumrfambict'; 
+        
+        // Construct the remote URL
+        const modelPath = `https://${SUPABASE_PROJECT_ID}.supabase.co/storage/v1/object/public/models/${modelName}`;
         
         const modelViewer = document.querySelector('model-viewer');
         // Set the src dynamically
