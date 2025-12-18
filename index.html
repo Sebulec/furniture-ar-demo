@@ -861,6 +861,17 @@
 
             <form id="productForm" onsubmit="event.preventDefault(); nextStep(4);">
                 <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="modelSelect">Select 3D Model (Demo)</label>
+                        <select id="modelSelect" style="padding: 0.8rem; border: 1px solid var(--border-color); border-radius: 4px; font-size: 1rem;">
+                            <option value="model.glb">Default Model (model.glb)</option>
+                            <option value="sofa-dl-welur.glb">Sofa Welur (sofa-dl-welur.glb)</option>
+                            <option value="chair.glb">Chair (chair.glb)</option>
+                            <option value="table.glb">Table (table.glb)</option>
+                        </select>
+                        <small style="color: #666; font-size: 0.8rem; margin-top: 4px;">Choose which pre-uploaded model this QR code links to.</small>
+                    </div>
+
                     <div class="form-group">
                         <label for="width" data-i18n="widthLabel">Width (cm) *</label>
                         <input type="number" id="width" min="1" step="0.1" placeholder="e.g. 240" required>
@@ -1362,15 +1373,19 @@
             const w = document.getElementById('width').value;
             const h = document.getElementById('height').value;
             const d = document.getElementById('depth').value;
+            const selectedModel = document.getElementById('modelSelect').value;
+            
             const productName = `Furniture Item ${w}×${h}×${d}cm`;
 
             // Dynamic URL generation for the AR asset
+            // Points to viewer.html with the specific model parameter
             const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
-            const productUrl = path + "/viewer.html";
+            const productUrl = `${path}/viewer.html?model=${selectedModel}`;
 
             const product = {
                 id: 'PROD-' + Math.floor(Math.random() * 10000),
                 name: productName,
+                model: selectedModel,
                 dims: {
                     w: w,
                     h: h,
@@ -1384,6 +1399,7 @@
             summaryList.innerHTML = `
                 <li>ID: ${product.id}</li>
                 <li>Name: ${product.name}</li>
+                <li>Model File: ${product.model}</li>
                 <li>Dimensions: ${product.dims.w}×${product.dims.h}×${product.dims.d} cm</li>
             `;
 
