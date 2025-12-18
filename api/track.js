@@ -23,17 +23,40 @@ export default async function handler(request, response) {
   try {
     const data = request.body;
     
-    // --- DATABASE STORAGE LOGIC HERE ---
-    // For now, we will just log to the Vercel Function Logs.
-    // To persist this, you would connect to Supabase, Firebase, or Vercel KV here.
-    
-    console.log("📝 NEW ANALYTICS EVENT:");
-    console.log(JSON.stringify(data, null, 2));
+    // --- DATABASE STORAGE (Supabase) ---
+    const { SUPABASE_URL, SUPABASE_KEY } = process.env;
 
-    // Example of what you would do with a database:
-    // await db.collection('analytics').add(data);
+    if (SUPABASE_URL && SUPABASE_KEY) {
+      // Send to Supabase via REST API (No npm dependencies needed)
+      const dbResponse = await fetch(`${SUPABASE_URL}/rest/v1/analytics`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({
+          event_type: data.event,
+          user_id: data.user_id,
+          model_name: data.model,
+          metadata: data // Store full payload as JSONB
+        })
+      });
 
-    return response.status(200).json({ success: true, message: 'Event tracked' });
+      if (!dbResponse.ok) {
+        const errText = await dbResponse.text();
+        console.error("Supabase Error:", errText);
+        // Don't fail the client request, just log error
+      } else {
+        console.log("✅ Saved to Supabase");
+      }
+    } else {
+      console.log("📝 (Log Only - No DB Configured) EVENT:");
+      console.log(JSON.stringify(data, null, 2));
+    }
+
+    return response.status(200).json({ success: true });
 
   } catch (error) {
     console.error("Tracking Error:", error);
