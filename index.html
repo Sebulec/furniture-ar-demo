@@ -809,9 +809,8 @@
                     <!-- Model Viewer for Step 2 -->
                     <model-viewer
                         id="modelViewerStep2"
-                                    // Set the model viewer's src to the selected model from Supabase
-                                    const selectedModelForPreview = document.getElementById('modelSelect').value || 'model.glb';
-                                    modelViewerStep2.src = `https://hdrizsefokumrfambict.supabase.co/storage/v1/object/public/models/${selectedModelForPreview}`;                        alt="3D model of furniture"
+                        src="https://hdrizsefokumrfambict.supabase.co/storage/v1/object/public/models/model.glb"
+                        alt="3D model of furniture"
                         ar
                         ar-modes="webxr scene-viewer quick-look"
                         camera-controls
@@ -1176,9 +1175,6 @@
         const aiLoader = document.getElementById('aiLoader');
         const modelPlaceholder = document.getElementById('modelPlaceholder');
         const step2Next = document.getElementById('step2Next');
-
-        // REPLACE 'YOUR_PROJECT_ID' with your actual Supabase Project ID (e.g., 'abcdefghijklm')
-        const SUPABASE_PROJECT_ID = 'hdrizsefokumrfambict'; 
 
         // Initialization
         detectAndSetLanguage();
