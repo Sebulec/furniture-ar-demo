@@ -213,18 +213,54 @@
         const params = new URLSearchParams(window.location.search);
         // Default to 'model.glb' if no param is provided
         const modelName = params.get('model') || 'model.glb';
-        
+
         // REPLACE 'YOUR_PROJECT_ID' with your actual Supabase Project ID (found in Project Settings -> General)
-        const SUPABASE_PROJECT_ID = 'hdrizsefokumrfambict'; 
-        
+        const SUPABASE_PROJECT_ID = 'hdrizsefokumrfambict';
+
         // Construct the remote URL
         const modelPath = `https://${SUPABASE_PROJECT_ID}.supabase.co/storage/v1/object/public/models/${modelName}`;
-        
+
         // --- UI Elements (Defined early for availability) ---
         const modelViewer = document.querySelector('model-viewer');
         const errorMessage = document.getElementById('error-message');
         const arInstructions = document.getElementById('arInstructions');
         const customArButton = document.getElementById('customArButton');
+
+        // --- Analytics Setup ---
+
+        // 2. User Identification (Anonymous)
+        function getUserId() {
+            let userId = localStorage.getItem('ar_user_id');
+            if (!userId) {
+                userId = 'user_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+                localStorage.setItem('ar_user_id', userId);
+            }
+            return userId;
+        }
+        const userId = getUserId();
+
+        // 3. Analytics Helper
+        async function trackEvent(eventName, extraData = {}) {
+            const payload = {
+                event: eventName,
+                user_id: userId,
+                model: modelName,
+                timestamp: new Date().toISOString(),
+                ...extraData
+            };
+            console.log('📊 Tracking:', payload);
+
+            try {
+                // Send to Vercel Serverless Function
+                await fetch('/api/track', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            } catch (err) {
+                console.warn('Analytics failed to send:', err);
+            }
+        }
 
         // Language Support
         let currentLang = 'en';
@@ -265,6 +301,7 @@
         function toggleLanguage() {
             const newLang = currentLang === 'en' ? 'pl' : 'en';
             setLanguage(newLang);
+            trackEvent('toggle_language', { from: currentLang, to: newLang });
         }
 
         function setLanguage(lang) {
@@ -313,21 +350,34 @@
         // --- Error Handling ---
         modelViewer.addEventListener('error', (event) => {
             console.error('Model loading error:', event);
+            trackEvent('model_load_error', {
+                model: modelName,
+                error: event.detail ? event.detail.message : 'Unknown error'
+            });
             errorMessage.innerText = getTrans('errorLoading');
             errorMessage.style.display = 'block';
         });
 
         // --- AR Button Click Handler ---
         customArButton.addEventListener('click', async () => {
+            // Track AR Button Click
+            trackEvent('click_ar_view', {
+                canActivateAR: modelViewer.canActivateAR,
+                ios: isIOS,
+                userAgent: navigator.userAgent
+            });
+
             try {
                 if (modelViewer.canActivateAR) {
                     customArButton.querySelector('#buttonText').innerText = getTrans('launching');
                     await modelViewer.activateAR();
+                    trackEvent('ar_activated_success', { model: modelName });
                     customArButton.querySelector('#buttonText').innerText = getTrans('arLaunched');
                     setTimeout(() => {
                         customArButton.querySelector('#buttonText').innerText = getTrans('viewInAr');
                     }, 2000);
                 } else {
+                    trackEvent('ar_not_available', { reason: 'canActivateAR_false' });
                     errorMessage.innerText = getTrans('errorArNotAvailable');
                     errorMessage.style.display = 'block';
                     setTimeout(() => {
@@ -336,6 +386,7 @@
                 }
             } catch (error) {
                 console.error('AR activation error:', error);
+                trackEvent('ar_activation_error', { error: error.message });
                 errorMessage.innerText = getTrans('errorLaunching');
                 errorMessage.style.display = 'block';
                 setTimeout(() => {
@@ -347,6 +398,19 @@
         // --- Model Load Complete ---
         modelViewer.addEventListener('load', () => {
             console.log('Model loaded successfully');
+            trackEvent('model_loaded', {
+                model: modelName,
+                modelPath: modelPath
+            });
+        });
+
+        // --- Track Page View (On Load) ---
+        trackEvent('view_page', {
+            userAgent: navigator.userAgent,
+            referrer: document.referrer,
+            language: navigator.language,
+            model: modelName,
+            isIOS: isIOS
         });
     </script>
 
