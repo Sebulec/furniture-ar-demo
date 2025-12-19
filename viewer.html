@@ -284,3 +284,64 @@
 
         // Detect iOS
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+        // 2. Set the model src dynamically
+        console.log('Loading model:', modelPath);
+        modelViewer.src = modelPath;
+
+        // --- Progress Bar Handling ---
+        const onProgress = (event) => {
+            const progressBar = event.target.querySelector('.progress-bar');
+            const updatingBar = event.target.querySelector('.update-bar');
+            if (updatingBar) {
+                updatingBar.style.width = `${event.detail.totalProgress * 100}%`;
+            }
+            if (event.detail.totalProgress === 1) {
+                progressBar.classList.add('hide');
+            }
+        };
+
+        modelViewer.addEventListener('progress', onProgress);
+
+        // --- Error Handling ---
+        modelViewer.addEventListener('error', (event) => {
+            console.error('Model loading error:', event);
+            errorMessage.innerText = getTrans('errorLoading');
+            errorMessage.style.display = 'block';
+        });
+
+        // --- AR Button Click Handler ---
+        customArButton.addEventListener('click', async () => {
+            try {
+                if (modelViewer.canActivateAR) {
+                    customArButton.querySelector('#buttonText').innerText = getTrans('launching');
+                    await modelViewer.activateAR();
+                    customArButton.querySelector('#buttonText').innerText = getTrans('arLaunched');
+                    setTimeout(() => {
+                        customArButton.querySelector('#buttonText').innerText = getTrans('viewInAr');
+                    }, 2000);
+                } else {
+                    errorMessage.innerText = getTrans('errorArNotAvailable');
+                    errorMessage.style.display = 'block';
+                    setTimeout(() => {
+                        errorMessage.style.display = 'none';
+                    }, 5000);
+                }
+            } catch (error) {
+                console.error('AR activation error:', error);
+                errorMessage.innerText = getTrans('errorLaunching');
+                errorMessage.style.display = 'block';
+                setTimeout(() => {
+                    errorMessage.style.display = 'none';
+                }, 5000);
+            }
+        });
+
+        // --- Model Load Complete ---
+        modelViewer.addEventListener('load', () => {
+            console.log('Model loaded successfully');
+        });
+    </script>
+
+</body>
+</html>
