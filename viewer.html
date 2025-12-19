@@ -225,127 +225,62 @@
         const arInstructions = document.getElementById('arInstructions');
         const customArButton = document.getElementById('customArButton');
 
+        // Language Support
+        let currentLang = 'en';
+
+        const translations = {
+            en: {
+                instruction: '👇 Tap "View in AR" button below to launch AR experience',
+                viewInAr: 'View in AR',
+                launching: 'Launching...',
+                openingAr: 'Otwieranie AR...', 
+                arLaunched: 'AR Launched!',
+                arNotAvailable: 'AR Not Available',
+                error: 'Error',
+                errorArNotAvailable: 'AR is not available on this device or browser. Make sure you\'re using HTTPS and a supported browser.',
+                errorLoading: 'Error loading model. Please check file format or connection.',
+                errorLaunching: 'Error launching AR'
+            },
+            pl: {
+                instruction: '👇 Dotknij przycisku "Zobacz w AR" poniżej, aby uruchomić AR',
+                viewInAr: 'Zobacz w AR',
+                launching: 'Uruchamianie...', 
+                openingAr: 'Otwieranie AR...', 
+                arLaunched: 'AR uruchomione!',
+                arNotAvailable: 'AR niedostępne',
+                error: 'Błąd',
+                errorArNotAvailable: 'AR nie jest dostępne na tym urządzeniu lub przeglądarce. Upewnij się, że używasz HTTPS i obsługiwanej przeglądarki.',
+                errorLoading: 'Błąd ładowania modelu. Sprawdź format pliku lub połączenie.',
+                errorLaunching: 'Błąd uruchamiania AR'
+            }
+        };
+
+        function detectAndSetLanguage() {
+            const userLang = navigator.language || navigator.userLanguage;
+            const langCode = userLang.substring(0, 2).toLowerCase();
+            setLanguage(langCode === 'pl' ? 'pl' : 'en');
+        }
+
+        function toggleLanguage() {
+            const newLang = currentLang === 'en' ? 'pl' : 'en';
+            setLanguage(newLang);
+        }
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            const t = translations[lang];
+
+            document.getElementById('langSwitchBtn').innerText = lang === 'en' ? 'PL' : 'EN';
+            document.getElementById('instructionText').innerText = t.instruction;
+            document.getElementById('buttonText').innerText = t.viewInAr;
+        }
+
+        function getTrans(key) {
+            return translations[currentLang][key] || key;
+        }
+
+        // Initialize language
+        detectAndSetLanguage();
+
         // Detect iOS
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-
-        // --- Event Listeners ---
-        
-        // Handle Progress
-        modelViewer.addEventListener('progress', (e) => {
-            const bar = document.querySelector('.update-bar');
-            bar.style.width = `${e.detail.totalProgress * 100}%`;
-        });
-
-        // Hide progress when loaded
-        modelViewer.addEventListener('load', () => {
-            const bar = document.querySelector('.progress-bar');
-            bar.classList.add('hide');
-            // Force hide to be sure
-            bar.style.display = 'none';
-
-            // Hide instructions after 5 seconds
-            setTimeout(() => {
-                arInstructions.classList.add('hidden');
-            }, 5000);
-
-            // Check if AR can be activated
-            setTimeout(() => {
-                if (!modelViewer.canActivateAR) {
-                    customArButton.style.opacity = '0.5';
-                    customArButton.style.cursor = 'not-allowed';
-                }
-            }, 1000);
-        });
-
-        // Error Handling
-        modelViewer.addEventListener('error', (e) => {
-            console.error('Model Viewer Error:', e);
-            errorMessage.textContent = getTrans('errorLoading');
-            errorMessage.style.display = 'block';
-            arInstructions.classList.add('hidden');
-            // Hide progress bar on error
-            document.querySelector('.progress-bar').classList.add('hide');
-            document.querySelector('.progress-bar').style.display = 'none';
-        });
-
-        // AR availability detection
-        modelViewer.addEventListener('ar-status', (e) => {
-            const available = e.detail.available;
-            console.log('AR Status:', available ? 'Available ✅' : 'Not Available ❌');
-
-            if (!available) {
-                // Only show this if we are not in an error state from loading
-                if (errorMessage.style.display === 'none') {
-                    // We don't want to show this immediately on desktop, only on click or if explicit
-                    // Actually, model-viewer might fire this early. Let's keep it but ensure it doesn't block loading UI.
-                }
-            }
-        });
-
-        // Custom AR button click handler
-        customArButton.addEventListener('click', async (e) => {
-            // ... (keep existing handler logic, it's fine)
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-
-            const buttonText = document.getElementById('buttonText');
-            buttonText.textContent = getTrans('launching');
-
-            // Track AR Button Tap
-            trackEvent('click_ar_view', { 
-                ios: isIOS,
-                canActivate: modelViewer.canActivateAR 
-            });
-
-            console.log('🚀 AR Button Clicked!');
-            
-            // Check if model is actually loaded
-            if (!modelViewer.loaded) {
-                console.warn('⚠️ Model not loaded yet');
-                errorMessage.textContent = getTrans('errorLoading');
-                errorMessage.style.display = 'block';
-                buttonText.textContent = getTrans('error');
-                setTimeout(() => buttonText.textContent = getTrans('viewInAr'), 2000);
-                return;
-            }
-
-            arInstructions.classList.add('hidden');
-
-            try {
-                // Trigger AR session
-                if (modelViewer.canActivateAR) {
-                    console.log('🎨 Activating AR NOW...');
-
-                    // Call activateAR directly. 
-                    // Note: On iOS, this must be called synchronously within a user gesture handler.
-                    // Async/await usually works if it's the immediate chain, but too many gaps can break it.
-                    await modelViewer.activateAR();
-                    
-                    buttonText.textContent = getTrans('arLaunched');
-                } else {
-                    console.error('❌ AR not available on this device');
-                    errorMessage.textContent = getTrans('errorArNotAvailable');
-                    errorMessage.style.display = 'block';
-                    buttonText.textContent = getTrans('arNotAvailable');
-                }
-            } catch (error) {
-                console.error('❌ Error activating AR:', error);
-                errorMessage.textContent = getTrans('errorLaunching');
-                errorMessage.style.display = 'block';
-                buttonText.textContent = getTrans('error');
-            }
-
-            // Reset button text after 2 seconds
-            setTimeout(() => {
-                buttonText.textContent = getTrans('viewInAr');
-            }, 2000);
-        }, { capture: true });
-
-        // --- Start Loading Model (After Listeners are Set) ---
-        modelViewer.src = modelPath;
-        console.log(`📂 Loading model: ${modelPath}`);
-
-    </script>
-</body>
-</html>
