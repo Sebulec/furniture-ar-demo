@@ -219,122 +219,17 @@
         // Construct the remote URL
         const modelPath = `https://${SUPABASE_PROJECT_ID}.supabase.co/storage/v1/object/public/models/${modelName}`;
         
+        // --- UI Elements (Defined early for availability) ---
         const modelViewer = document.querySelector('model-viewer');
-        // Set the src dynamically
-        modelViewer.src = modelPath;
-        console.log(`📂 Loading model: ${modelPath}`);
-
-        // 2. User Identification (Anonymous)
-        function getUserId() {
-            let userId = localStorage.getItem('ar_user_id');
-            if (!userId) {
-                userId = 'user_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
-                localStorage.setItem('ar_user_id', userId);
-            }
-            return userId;
-        }
-        const userId = getUserId();
-
-        // 3. Analytics Helper
-        async function trackEvent(eventName, extraData = {}) {
-            const payload = {
-                event: eventName,
-                user_id: userId,
-                model: modelName,
-                timestamp: new Date().toISOString(),
-                ...extraData
-            };
-            console.log('📊 Tracking:', payload);
-
-            try {
-                // Send to Vercel Serverless Function
-                await fetch('/api/track', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-            } catch (err) {
-                console.warn('Analytics failed to send:', err);
-            }
-        }
-
-        // Track Page View
-        trackEvent('view_page', { 
-            userAgent: navigator.userAgent,
-            referrer: document.referrer,
-            platform: navigator.platform,
-            screenWidth: screen.width,
-            screenHeight: screen.height,
-            devicePixelRatio: window.devicePixelRatio,
-            browserLanguage: navigator.language,
-            maxTouchPoints: navigator.maxTouchPoints,
-            // Optionally, for more advanced parsing, could use a library to decode userAgent
-            // or send raw userAgent for server-side parsing.
-        });
-
-        // Language Support
-        let currentLang = 'en';
-
-        const translations = {
-            en: {
-                instruction: '👇 Tap "View in AR" button below to launch AR experience',
-                viewInAr: 'View in AR',
-                launching: 'Launching...',
-                openingAr: 'Opening AR...',
-                arLaunched: 'AR Launched!',
-                arNotAvailable: 'AR Not Available',
-                error: 'Error',
-                errorArNotAvailable: 'AR is not available on this device or browser. Make sure you\'re using HTTPS and a supported browser.',
-                errorLoading: 'Error loading model. Please check file format or connection.',
-                errorLaunching: 'Error launching AR'
-            },
-            pl: {
-                instruction: '👇 Dotknij przycisku "Zobacz w AR" poniżej, aby uruchomić AR',
-                viewInAr: 'Zobacz w AR',
-                launching: 'Uruchamianie...',
-                openingAr: 'Otwieranie AR...',
-                arLaunched: 'AR uruchomione!',
-                arNotAvailable: 'AR niedostępne',
-                error: 'Błąd',
-                errorArNotAvailable: 'AR nie jest dostępne na tym urządzeniu lub przeglądarce. Upewnij się, że używasz HTTPS i obsługiwanej przeglądarki.',
-                errorLoading: 'Błąd ładowania modelu. Sprawdź format pliku lub połączenie.',
-                errorLaunching: 'Błąd uruchamiania AR'
-            }
-        };
-
-        function detectAndSetLanguage() {
-            const userLang = navigator.language || navigator.userLanguage;
-            const langCode = userLang.substring(0, 2).toLowerCase();
-            setLanguage(langCode === 'pl' ? 'pl' : 'en');
-        }
-
-        function toggleLanguage() {
-            const newLang = currentLang === 'en' ? 'pl' : 'en';
-            setLanguage(newLang);
-        }
-
-        function setLanguage(lang) {
-            currentLang = lang;
-            const t = translations[lang];
-
-            document.getElementById('langSwitchBtn').innerText = lang === 'en' ? 'PL' : 'EN';
-            document.getElementById('instructionText').innerText = t.instruction;
-            document.getElementById('buttonText').innerText = t.viewInAr;
-        }
-
-        function getTrans(key) {
-            return translations[currentLang][key] || key;
-        }
-
-        // Initialize language
-        detectAndSetLanguage();
-
-        // Universal GLB support for iOS 12+ and Android via model-viewer
-        modelViewer = document.querySelector('model-viewer');
         const errorMessage = document.getElementById('error-message');
         const arInstructions = document.getElementById('arInstructions');
         const customArButton = document.getElementById('customArButton');
 
+        // Detect iOS
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+        // --- Event Listeners ---
+        
         // Handle Progress
         modelViewer.addEventListener('progress', (e) => {
             const bar = document.querySelector('.update-bar');
@@ -345,6 +240,8 @@
         modelViewer.addEventListener('load', () => {
             const bar = document.querySelector('.progress-bar');
             bar.classList.add('hide');
+            // Force hide to be sure
+            bar.style.display = 'none';
 
             // Hide instructions after 5 seconds
             setTimeout(() => {
@@ -368,6 +265,7 @@
             arInstructions.classList.add('hidden');
             // Hide progress bar on error
             document.querySelector('.progress-bar').classList.add('hide');
+            document.querySelector('.progress-bar').style.display = 'none';
         });
 
         // AR availability detection
@@ -384,11 +282,9 @@
             }
         });
 
-        // Detect iOS
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-
         // Custom AR button click handler
         customArButton.addEventListener('click', async (e) => {
+            // ... (keep existing handler logic, it's fine)
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
@@ -453,6 +349,10 @@
                 buttonText.textContent = getTrans('viewInAr');
             }, 2000);
         }, { capture: true });
+
+        // --- Start Loading Model (After Listeners are Set) ---
+        modelViewer.src = modelPath;
+        console.log(`📂 Loading model: ${modelPath}`);
 
     </script>
 </body>
