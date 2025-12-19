@@ -317,19 +317,11 @@
                 if (modelViewer.canActivateAR) {
                     console.log('🎨 Activating AR NOW...');
 
-                    // For iOS, try to trigger the native AR button if our custom one fails
-                    if (isIOS) {
-                         // ... (keep existing iOS logic)
-                        const nativeArButton = modelViewer.shadowRoot?.querySelector('#default-ar-button');
-                        if (nativeArButton && !nativeArButton.classList.contains('hide')) {
-                            nativeArButton.click();
-                            buttonText.textContent = getTrans('openingAr');
-                            return;
-                        }
-                    }
-
-                    // Call activateAR
+                    // Call activateAR directly. 
+                    // Note: On iOS, this must be called synchronously within a user gesture handler.
+                    // Async/await usually works if it's the immediate chain, but too many gaps can break it.
                     await modelViewer.activateAR();
+                    
                     buttonText.textContent = getTrans('arLaunched');
                 } else {
                     console.error('❌ AR not available on this device');
