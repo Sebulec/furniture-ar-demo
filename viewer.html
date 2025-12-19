@@ -179,6 +179,7 @@
 
     <model-viewer
         src=""
+        ios-src=""
         alt="AR Model"
         ar
         ar-modes="scene-viewer webxr quick-look"
@@ -288,6 +289,12 @@
         // 2. Set the model src dynamically
         console.log('Loading model:', modelPath);
         modelViewer.src = modelPath;
+
+        // Set ios-src for iOS devices, replacing .glb with .usdz
+        if (isIOS) {
+            const iosSrc = modelPath.replace(/\.glb$/i, '.usdz');
+            modelViewer.setAttribute('ios-src', iosSrc);
+        }
 
         // --- Progress Bar Handling ---
         const onProgress = (event) => {
