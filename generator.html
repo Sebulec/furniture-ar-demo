@@ -353,22 +353,29 @@
 
                     <div class="form-group full-width">
                         <label for="brandSelect">Brand / Directory *</label>
-                        <select id="brandSelect" onchange="loadModels()" required>
+                        <select id="brandSelect" onchange="handleBrandChange()" required>
                             <option value="">Select Brand...</option>
                             <option value="kler">Kler</option>
                             <option value="nowak">Nowak</option>
+                            <option value="manual">Manual Entry</option>
                         </select>
-                        <small style="color: #666; font-size: 0.8rem; margin-top: 4px;">Select the brand directory to load available models.</small>
+                        <small style="color: #666; font-size: 0.8rem; margin-top: 4px;">Select the brand directory or use manual entry.</small>
                     </div>
 
-                    <div class="form-group full-width">
+                    <div class="form-group full-width" id="modelSelectGroup">
                         <label for="modelSelect">3D Model *</label>
                         <select id="modelSelect" required disabled>
                             <option value="">Select a brand first...</option>
                         </select>
                         <small style="color: #666; font-size: 0.8rem; margin-top: 4px;">Choose the GLB model file from Supabase storage.</small>
                         <div class="loader" id="modelLoader"></div>
-                        <div class="error-message" id="modelError">Failed to load models. Please check your connection.</div>
+                        <div class="error-message" id="modelError">Failed to load models. Using manual entry instead.</div>
+                    </div>
+
+                    <div class="form-group full-width" id="manualModelGroup" style="display: none;">
+                        <label for="manualModel">Model Path (e.g., kler/bach.glb) *</label>
+                        <input type="text" id="manualModel" placeholder="e.g., kler/bach.glb">
+                        <small style="color: #666; font-size: 0.8rem; margin-top: 4px;">Enter the path to your GLB model in the format: brand/filename.glb</small>
                     </div>
 
                     <div class="form-group">
@@ -457,21 +464,45 @@
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let qrCodeObj = null;
+        let useManualEntry = false;
+
+        // Handle brand selection change
+        function handleBrandChange() {
+            const brandSelect = document.getElementById('brandSelect');
+            const brand = brandSelect.value;
+            const modelSelectGroup = document.getElementById('modelSelectGroup');
+            const manualModelGroup = document.getElementById('manualModelGroup');
+
+            if (brand === 'manual') {
+                // Show manual entry
+                modelSelectGroup.style.display = 'none';
+                manualModelGroup.style.display = 'block';
+                document.getElementById('modelSelect').removeAttribute('required');
+                document.getElementById('manualModel').setAttribute('required', 'required');
+                useManualEntry = true;
+            } else if (brand) {
+                // Try to load models from Supabase
+                modelSelectGroup.style.display = 'block';
+                manualModelGroup.style.display = 'none';
+                document.getElementById('modelSelect').setAttribute('required', 'required');
+                document.getElementById('manualModel').removeAttribute('required');
+                useManualEntry = false;
+                loadModels(brand);
+            } else {
+                // Reset
+                modelSelectGroup.style.display = 'block';
+                manualModelGroup.style.display = 'none';
+                document.getElementById('modelSelect').setAttribute('required', 'required');
+                document.getElementById('manualModel').removeAttribute('required');
+                useManualEntry = false;
+            }
+        }
 
         // Load models from Supabase storage
-        async function loadModels() {
-            const brandSelect = document.getElementById('brandSelect');
+        async function loadModels(brand) {
             const modelSelect = document.getElementById('modelSelect');
             const modelLoader = document.getElementById('modelLoader');
             const modelError = document.getElementById('modelError');
-
-            const brand = brandSelect.value;
-
-            if (!brand) {
-                modelSelect.disabled = true;
-                modelSelect.innerHTML = '<option value="">Select a brand first...</option>';
-                return;
-            }
 
             // Show loader
             modelLoader.style.display = 'block';
@@ -489,13 +520,18 @@
                         sortBy: { column: 'name', order: 'asc' }
                     });
 
-                if (error) throw error;
+                if (error) {
+                    console.error('Supabase storage error:', error);
+                    throw error;
+                }
 
                 // Filter GLB files only
                 const glbFiles = data.filter(file => file.name.toLowerCase().endsWith('.glb'));
 
                 if (glbFiles.length === 0) {
-                    modelSelect.innerHTML = '<option value="">No GLB models found</option>';
+                    // No models found, suggest manual entry
+                    showToast('No models found. Please use manual entry.');
+                    switchToManualEntry(brand);
                     modelLoader.style.display = 'none';
                     return;
                 }
@@ -514,22 +550,59 @@
 
             } catch (error) {
                 console.error('Error loading models:', error);
-                modelSelect.innerHTML = '<option value="">Error loading models</option>';
                 modelError.classList.add('show');
                 modelLoader.style.display = 'none';
+
+                // Auto-switch to manual entry after error
+                showToast('Cannot list models from storage. Using manual entry.');
+                setTimeout(() => {
+                    switchToManualEntry(brand);
+                }, 2000);
             }
+        }
+
+        // Switch to manual entry mode
+        function switchToManualEntry(brand) {
+            const brandSelect = document.getElementById('brandSelect');
+            const modelSelectGroup = document.getElementById('modelSelectGroup');
+            const manualModelGroup = document.getElementById('manualModelGroup');
+
+            modelSelectGroup.style.display = 'none';
+            manualModelGroup.style.display = 'block';
+            document.getElementById('modelSelect').removeAttribute('required');
+            document.getElementById('manualModel').setAttribute('required', 'required');
+
+            // Pre-fill the brand if known
+            if (brand) {
+                document.getElementById('manualModel').placeholder = `e.g., ${brand}/model-name.glb`;
+            }
+
+            useManualEntry = true;
         }
 
         // Generate QR Code
         function generateQR() {
             const productName = document.getElementById('productName').value;
-            const modelPath = document.getElementById('modelSelect').value;
+            let modelPath;
+
+            if (useManualEntry) {
+                modelPath = document.getElementById('manualModel').value;
+            } else {
+                modelPath = document.getElementById('modelSelect').value;
+            }
+
             const width = document.getElementById('width').value;
             const height = document.getElementById('height').value;
             const depth = document.getElementById('depth').value;
 
             if (!modelPath) {
-                showToast('Please select a 3D model');
+                showToast('Please enter a 3D model path');
+                return;
+            }
+
+            // Ensure modelPath ends with .glb
+            if (!modelPath.toLowerCase().endsWith('.glb')) {
+                showToast('Model path must end with .glb');
                 return;
             }
 
