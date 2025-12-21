@@ -862,6 +862,11 @@
             <form id="productForm" onsubmit="event.preventDefault(); nextStep(4);">
                 <div class="form-grid">
                     <div class="form-group full-width">
+                        <label for="productName" data-i18n="prodNameLabel">Product Name *</label>
+                        <input type="text" id="productName" placeholder="e.g. Modern Sofa Collection" required style="padding: 0.8rem; border: 1px solid var(--border-color); border-radius: 4px; font-size: 1rem;">
+                    </div>
+
+                    <div class="form-group full-width">
                         <label for="modelSelect">Select 3D Model (Demo)</label>
                         <select id="modelSelect" style="padding: 0.8rem; border: 1px solid var(--border-color); border-radius: 4px; font-size: 1rem;">
                             <option value="model.glb">Default Model (model.glb)</option>
@@ -1347,6 +1352,7 @@
 
         // Form Logic
         function fillSampleData() {
+            document.getElementById('productName').value = 'Modern Sofa Collection';
             document.getElementById('width').value = 240;
             document.getElementById('height').value = 85;
             document.getElementById('depth').value = 95;
@@ -1357,11 +1363,8 @@
             // Using the static sample image for the mock preview
             document.getElementById('mockProductImage').src = "assets/sofa-dl-welur.jpg";
 
-            // Auto-generate product name based on dimensions
-            const w = document.getElementById('width').value;
-            const h = document.getElementById('height').value;
-            const d = document.getElementById('depth').value;
-            const productName = `Furniture Item ${w}×${h}×${d}cm`;
+            // Get product name from input
+            const productName = document.getElementById('productName').value || 'Product Name';
 
             document.getElementById('mockProductTitle').innerText = productName;
             document.getElementById('mockProductPrice').innerText = "$0.00"; // Default price
@@ -1369,13 +1372,12 @@
 
         // QR Code Generation
         function generateQRCode() {
-            // Auto-generate product name and URL
+            // Get values from form
+            const productName = document.getElementById('productName').value || 'Product Name';
             const w = document.getElementById('width').value;
             const h = document.getElementById('height').value;
             const d = document.getElementById('depth').value;
             const selectedModel = document.getElementById('modelSelect').value;
-            
-            const productName = `Furniture Item ${w}×${h}×${d}cm`;
 
             // Dynamic URL generation for the AR asset
             // Points to viewer.html with the specific model parameter
