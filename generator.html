@@ -322,104 +322,104 @@
 <body>
 
     <header>
-        <h1>AR QR Code Generator</h1>
-        <p>Quick Generator - Create AR QR Codes from Supabase Models</p>
+        <h1>Generator Kodów QR AR</h1>
+        <p>Szybki Generator - Twórz kody QR AR dla swoich modeli</p>
     </header>
 
     <main>
         <!-- Form Section -->
         <section id="formSection" class="card">
-            <h2>Product Information</h2>
-            <p style="margin-bottom: 1.5rem; color: #666;">Fill in the product details to generate an AR QR code.</p>
+            <h2>Informacje o Produkcie</h2>
+            <p style="margin-bottom: 1.5rem; color: #666;">Wypełnij szczegóły produktu, aby wygenerować kod QR AR.</p>
 
             <form id="generatorForm" onsubmit="event.preventDefault(); generateQR();">
                 <div class="form-grid">
                     <div class="form-group full-width">
-                        <label for="productName">Product Name *</label>
-                        <input type="text" id="productName" placeholder="e.g. Modern Sofa Collection" required>
+                        <label for="productName">Nazwa Produktu *</label>
+                        <input type="text" id="productName" placeholder="np. Nowoczesna Sofa Kolekcja" required>
                     </div>
 
                     <div class="form-group full-width">
-                        <label for="modelPath">Model Path *</label>
-                        <input type="text" id="modelPath" placeholder="e.g., kler/bach.glb or nowak/table.glb" required>
-                        <small style="color: #666; font-size: 0.8rem; margin-top: 4px;">Enter the path to your GLB model in the format: brand/filename.glb</small>
+                        <label for="modelPath">Ścieżka do Modelu *</label>
+                        <input type="text" id="modelPath" placeholder="np. kler/bach.glb lub nowak/table.glb" required>
+                        <small style="color: #666; font-size: 0.8rem; margin-top: 4px;">Wprowadź ścieżkę do modelu GLB w formacie: marka/nazwa_pliku.glb</small>
                     </div>
 
                     <div class="form-group">
-                        <label for="width">Width (cm) *</label>
-                        <input type="number" id="width" min="1" step="0.1" placeholder="e.g. 240" required>
+                        <label for="width">Szerokość (cm) *</label>
+                        <input type="number" id="width" min="1" step="0.1" placeholder="np. 240" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="height">Height (cm) *</label>
-                        <input type="number" id="height" min="1" step="0.1" placeholder="e.g. 85" required>
+                        <label for="height">Wysokość (cm) *</label>
+                        <input type="number" id="height" min="1" step="0.1" placeholder="np. 85" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="depth">Depth (cm) *</label>
-                        <input type="number" id="depth" min="1" step="0.1" placeholder="e.g. 95" required>
+                        <label for="depth">Głębokość (cm) *</label>
+                        <input type="number" id="depth" min="1" step="0.1" placeholder="np. 95" required>
                     </div>
                 </div>
 
                 <button type="submit" class="btn btn-primary" id="generateBtn">
-                    <span>🎯</span> Generate AR QR Code
+                    <span>🎯</span> Wygeneruj Kod QR AR
                 </button>
             </form>
         </section>
 
         <!-- Result Section -->
         <section id="resultSection" class="result-section card">
-            <h2>Your AR QR Code is Ready!</h2>
+            <h2>Twój Kod QR AR jest Gotowy!</h2>
 
             <div class="result-container">
                 <div class="marketing-card" id="marketingCard">
                     <div class="marketing-header">
-                        <div class="marketing-title">See it in your room</div>
-                        <div class="marketing-subtitle">Scan with your phone camera</div>
+                        <div class="marketing-title">Zobacz w swoim pokoju</div>
+                        <div class="marketing-subtitle">Zeskanuj aparatem w telefonie</div>
                         <div class="ar-arrow">⬇</div>
                     </div>
 
                     <div id="qrcode"></div>
 
                     <div class="marketing-footer">
-                        <div class="product-tag" id="resultName">Product Name</div>
-                        <div style="font-size: 0.8rem; color: #888; margin-top:0.2rem;">AR Visualization</div>
+                        <div class="product-tag" id="resultName">Nazwa Produktu</div>
+                        <div style="font-size: 0.8rem; color: #888; margin-top:0.2rem;">Wizualizacja AR</div>
                     </div>
                 </div>
 
                 <div class="action-buttons">
                     <button class="btn btn-secondary" onclick="downloadMarketingCard()">
-                        <span>⬇️</span> Download Poster
+                        <span>⬇️</span> Pobierz Plakat
                     </button>
                     <button class="btn btn-outline" onclick="copyLink()">
-                        <span>📋</span> Copy Link
+                        <span>📋</span> Kopiuj Link
                     </button>
                     <button class="btn btn-outline" onclick="window.print()">
-                        <span>🖨️</span> Print
+                        <span>🖨️</span> Drukuj
                     </button>
                 </div>
 
                 <div class="info-box" style="text-align: left; width: 100%;">
-                    <strong>Generated Data:</strong>
+                    <strong>Wygenerowane Dane:</strong>
                     <ul id="summaryList" style="margin-left: 1.5rem; margin-top: 0.5rem; color: #666;">
                         <!-- JS fills this -->
                     </ul>
                 </div>
 
                 <button class="btn btn-primary" onclick="resetForm()" style="margin-top: 1rem;">
-                    <span>🔄</span> Generate Another
+                    <span>🔄</span> Wygeneruj Kolejny
                 </button>
             </div>
         </section>
     </main>
 
     <footer>
-        <p>AR QR Code Generator &copy; 2025</p>
-        <p>Powered by Supabase Storage</p>
+        <p>Generator Kodów QR AR &copy; 2025</p>
+        <p>Technologia AR dla Twojego biznesu</p>
     </footer>
 
     <!-- Toast Notification -->
-    <div id="toast" class="toast">Link copied to clipboard!</div>
+    <div id="toast" class="toast">Link skopiowany do schowka!</div>
 
     <script>
         let qrCodeObj = null;
@@ -433,13 +433,13 @@
             const depth = document.getElementById('depth').value;
 
             if (!modelPath) {
-                showToast('Please enter a 3D model path');
+                showToast('Proszę wprowadzić ścieżkę do modelu 3D');
                 return;
             }
 
             // Ensure modelPath ends with .glb
             if (!modelPath.toLowerCase().endsWith('.glb')) {
-                showToast('Model path must end with .glb');
+                showToast('Ścieżka modelu musi kończyć się na .glb');
                 return;
             }
 
@@ -452,10 +452,10 @@
             // Display summary
             const summaryList = document.getElementById('summaryList');
             summaryList.innerHTML = `
-                <li><strong>Product Name:</strong> ${productName}</li>
+                <li><strong>Nazwa Produktu:</strong> ${productName}</li>
                 <li><strong>Model:</strong> ${modelPath}</li>
-                <li><strong>Dimensions:</strong> ${width}×${height}×${depth} cm</li>
-                <li><strong>Viewer URL:</strong> <a href="${viewerUrl}" target="_blank" style="color: var(--secondary-color);">Open</a></li>
+                <li><strong>Wymiary:</strong> ${width}×${height}×${depth} cm</li>
+                <li><strong>URL Podglądu:</strong> <a href="${viewerUrl}" target="_blank" style="color: var(--secondary-color);">Otwórz</a></li>
             `;
 
             document.getElementById('resultName').innerText = productName;
@@ -517,12 +517,12 @@
 
             // Draw title
             ctx.font = 'bold 42px -apple-system, sans-serif';
-            ctx.fillText('See it in your room', width / 2, 120);
+            ctx.fillText('Zobacz w swoim pokoju', width / 2, 120);
 
             // Draw subtitle
             ctx.font = '24px -apple-system, sans-serif';
             ctx.fillStyle = '#666666';
-            ctx.fillText('Scan with your phone camera', width / 2, 160);
+            ctx.fillText('Zeskanuj aparatem w telefonie', width / 2, 160);
 
             // Draw arrow
             ctx.beginPath();
@@ -550,11 +550,11 @@
 
             ctx.fillStyle = '#888888';
             ctx.font = '20px -apple-system, sans-serif';
-            ctx.fillText('AR Visualization', width / 2, 700);
+            ctx.fillText('Wizualizacja AR', width / 2, 700);
 
             ctx.font = 'italic 16px -apple-system, sans-serif';
             ctx.fillStyle = '#aaaaaa';
-            ctx.fillText('Powered by AR Generator', width / 2, 750);
+            ctx.fillText('Generator Kodów QR AR', width / 2, 750);
 
             // Trigger download
             const link = document.createElement('a');
@@ -569,9 +569,9 @@
         function copyLink() {
             const link = document.getElementById('qrcode').dataset.link;
             navigator.clipboard.writeText(link).then(() => {
-                showToast('Link copied to clipboard!');
+                showToast('Link skopiowany do schowka!');
             }).catch(err => {
-                showToast('Failed to copy link');
+                showToast('Nie udało się skopiować linku');
                 console.error('Copy failed:', err);
             });
         }
