@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AR QR Code Generator</title>
-    <!-- Supabase Client -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- QRCode.js Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
@@ -319,16 +317,6 @@
             margin-top: auto;
         }
 
-        .error-message {
-            color: #f44336;
-            font-size: 0.85rem;
-            margin-top: 0.5rem;
-            display: none;
-        }
-
-        .error-message.show {
-            display: block;
-        }
     </style>
 </head>
 <body>
@@ -352,29 +340,8 @@
                     </div>
 
                     <div class="form-group full-width">
-                        <label for="brandSelect">Brand / Directory *</label>
-                        <select id="brandSelect" onchange="handleBrandChange()" required>
-                            <option value="">Select Brand...</option>
-                            <option value="kler">Kler</option>
-                            <option value="nowak">Nowak</option>
-                            <option value="manual">Manual Entry</option>
-                        </select>
-                        <small style="color: #666; font-size: 0.8rem; margin-top: 4px;">Select the brand directory or use manual entry.</small>
-                    </div>
-
-                    <div class="form-group full-width" id="modelSelectGroup">
-                        <label for="modelSelect">3D Model *</label>
-                        <select id="modelSelect" required disabled>
-                            <option value="">Select a brand first...</option>
-                        </select>
-                        <small style="color: #666; font-size: 0.8rem; margin-top: 4px;">Choose the GLB model file from Supabase storage.</small>
-                        <div class="loader" id="modelLoader"></div>
-                        <div class="error-message" id="modelError">Failed to load models. Using manual entry instead.</div>
-                    </div>
-
-                    <div class="form-group full-width" id="manualModelGroup" style="display: none;">
-                        <label for="manualModel">Model Path (e.g., kler/bach.glb) *</label>
-                        <input type="text" id="manualModel" placeholder="e.g., kler/bach.glb">
+                        <label for="modelPath">Model Path *</label>
+                        <input type="text" id="modelPath" placeholder="e.g., kler/bach.glb or nowak/table.glb" required>
                         <small style="color: #666; font-size: 0.8rem; margin-top: 4px;">Enter the path to your GLB model in the format: brand/filename.glb</small>
                     </div>
 
@@ -455,142 +422,12 @@
     <div id="toast" class="toast">Link copied to clipboard!</div>
 
     <script>
-        // Supabase Configuration
-        const SUPABASE_URL = 'https://hdrizsefokumrfambict.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhkcml6c2Vmb2t1bXJmYW1iaWN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ2MjEwODAsImV4cCI6MjA1MDE5NzA4MH0.d3jfaVGg_r6mO4uLpvqQESfIWiYb29C8b5TUKjLuMH4';
-        const STORAGE_BUCKET = 'models';
-
-        // Initialize Supabase client
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
         let qrCodeObj = null;
-        let useManualEntry = false;
-
-        // Handle brand selection change
-        function handleBrandChange() {
-            const brandSelect = document.getElementById('brandSelect');
-            const brand = brandSelect.value;
-            const modelSelectGroup = document.getElementById('modelSelectGroup');
-            const manualModelGroup = document.getElementById('manualModelGroup');
-
-            if (brand === 'manual') {
-                // Show manual entry
-                modelSelectGroup.style.display = 'none';
-                manualModelGroup.style.display = 'block';
-                document.getElementById('modelSelect').removeAttribute('required');
-                document.getElementById('manualModel').setAttribute('required', 'required');
-                useManualEntry = true;
-            } else if (brand) {
-                // Try to load models from Supabase
-                modelSelectGroup.style.display = 'block';
-                manualModelGroup.style.display = 'none';
-                document.getElementById('modelSelect').setAttribute('required', 'required');
-                document.getElementById('manualModel').removeAttribute('required');
-                useManualEntry = false;
-                loadModels(brand);
-            } else {
-                // Reset
-                modelSelectGroup.style.display = 'block';
-                manualModelGroup.style.display = 'none';
-                document.getElementById('modelSelect').setAttribute('required', 'required');
-                document.getElementById('manualModel').removeAttribute('required');
-                useManualEntry = false;
-            }
-        }
-
-        // Load models from Supabase storage
-        async function loadModels(brand) {
-            const modelSelect = document.getElementById('modelSelect');
-            const modelLoader = document.getElementById('modelLoader');
-            const modelError = document.getElementById('modelError');
-
-            // Show loader
-            modelLoader.style.display = 'block';
-            modelError.classList.remove('show');
-            modelSelect.disabled = true;
-            modelSelect.innerHTML = '<option value="">Loading models...</option>';
-
-            try {
-                // List files in the brand directory
-                const { data, error } = await supabase.storage
-                    .from(STORAGE_BUCKET)
-                    .list(brand, {
-                        limit: 100,
-                        offset: 0,
-                        sortBy: { column: 'name', order: 'asc' }
-                    });
-
-                if (error) {
-                    console.error('Supabase storage error:', error);
-                    throw error;
-                }
-
-                // Filter GLB files only
-                const glbFiles = data.filter(file => file.name.toLowerCase().endsWith('.glb'));
-
-                if (glbFiles.length === 0) {
-                    // No models found, suggest manual entry
-                    showToast('No models found. Please use manual entry.');
-                    switchToManualEntry(brand);
-                    modelLoader.style.display = 'none';
-                    return;
-                }
-
-                // Populate dropdown
-                modelSelect.innerHTML = '<option value="">Select a model...</option>';
-                glbFiles.forEach(file => {
-                    const option = document.createElement('option');
-                    option.value = `${brand}/${file.name}`;
-                    option.textContent = file.name;
-                    modelSelect.appendChild(option);
-                });
-
-                modelSelect.disabled = false;
-                modelLoader.style.display = 'none';
-
-            } catch (error) {
-                console.error('Error loading models:', error);
-                modelError.classList.add('show');
-                modelLoader.style.display = 'none';
-
-                // Auto-switch to manual entry after error
-                showToast('Cannot list models from storage. Using manual entry.');
-                setTimeout(() => {
-                    switchToManualEntry(brand);
-                }, 2000);
-            }
-        }
-
-        // Switch to manual entry mode
-        function switchToManualEntry(brand) {
-            const brandSelect = document.getElementById('brandSelect');
-            const modelSelectGroup = document.getElementById('modelSelectGroup');
-            const manualModelGroup = document.getElementById('manualModelGroup');
-
-            modelSelectGroup.style.display = 'none';
-            manualModelGroup.style.display = 'block';
-            document.getElementById('modelSelect').removeAttribute('required');
-            document.getElementById('manualModel').setAttribute('required', 'required');
-
-            // Pre-fill the brand if known
-            if (brand) {
-                document.getElementById('manualModel').placeholder = `e.g., ${brand}/model-name.glb`;
-            }
-
-            useManualEntry = true;
-        }
 
         // Generate QR Code
         function generateQR() {
             const productName = document.getElementById('productName').value;
-            let modelPath;
-
-            if (useManualEntry) {
-                modelPath = document.getElementById('manualModel').value;
-            } else {
-                modelPath = document.getElementById('modelSelect').value;
-            }
-
+            const modelPath = document.getElementById('modelPath').value;
             const width = document.getElementById('width').value;
             const height = document.getElementById('height').value;
             const depth = document.getElementById('depth').value;
@@ -648,8 +485,6 @@
         // Reset form
         function resetForm() {
             document.getElementById('generatorForm').reset();
-            document.getElementById('modelSelect').disabled = true;
-            document.getElementById('modelSelect').innerHTML = '<option value="">Select a brand first...</option>';
             document.getElementById('formSection').style.display = 'block';
             document.getElementById('resultSection').classList.remove('active');
             window.scrollTo(0, 0);
