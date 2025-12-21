@@ -1380,9 +1380,10 @@
             const selectedModel = document.getElementById('modelSelect').value;
 
             // Dynamic URL generation for the AR asset
-            // Points to viewer.html with the specific model parameter
+            // Points to viewer.html with the model and product name parameters
             const path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
-            const productUrl = `${path}/viewer.html?model=${selectedModel}`;
+            const encodedName = encodeURIComponent(productName);
+            const productUrl = `${path}/viewer.html?model=${selectedModel}&name=${encodedName}`;
 
             const product = {
                 id: 'PROD-' + Math.floor(Math.random() * 10000),
