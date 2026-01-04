@@ -63,18 +63,16 @@ def resize_glb(input_path, target_dims_cm, output_path):
     scale_x = target_w_m / current_dims[0] if current_dims[0] > 0 else 1
     scale_y = target_h_m / current_dims[1] if current_dims[1] > 0 else 1
     scale_z = target_d_m / current_dims[2] if current_dims[2] > 0 else 1
-    
-    # Use uniform scaling to maintain aspect ratio (fit inside the box)
-    scale_uniform = min(scale_x, scale_y, scale_z)
-    
-    print(f"Target limit (m): {target_w_m:.2f}, {target_h_m:.2f}, {target_d_m:.2f}")
+
+    print(f"Target dimensions (m): {target_w_m:.2f}, {target_h_m:.2f}, {target_d_m:.2f}")
     print(f"Axis scale factors: X={scale_x:.4f}, Y={scale_y:.4f}, Z={scale_z:.4f}")
-    print(f"Applying Uniform Scale: {scale_uniform:.4f}")
-    
+    print(f"Applying Non-Uniform Scale (exact dimensions)")
+
+    # Apply non-uniform scaling to match exact dimensions
     matrix = np.eye(4)
-    matrix[0,0] = scale_uniform
-    matrix[1,1] = scale_uniform
-    matrix[2,2] = scale_uniform
+    matrix[0,0] = scale_x
+    matrix[1,1] = scale_y
+    matrix[2,2] = scale_z
     
     if isinstance(scene, trimesh.Scene):
         scene.apply_transform(matrix)
