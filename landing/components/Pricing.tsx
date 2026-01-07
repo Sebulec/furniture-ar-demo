@@ -1,49 +1,32 @@
 import { Check } from 'lucide-react';
 
-export default function Pricing() {
+export default function Pricing({ dict }: { dict: any }) {
   const plans = [
     {
-      name: "Starter",
+      name: dict.pricing.starter.name,
       price: "$0",
       period: "/month",
-      description: "Perfect for testing the waters.",
-      features: [
-        "3 Product Uploads/mo",
-        "Standard Resolution",
-        "Web AR Viewer",
-        "Community Support"
-      ],
-      cta: "Start Free",
+      description: dict.pricing.starter.desc,
+      features: dict.pricing.starter.features,
+      cta: dict.pricing.starter.cta,
       highlighted: false
     },
     {
-      name: "Growth",
+      name: dict.pricing.growth.name,
       price: "$49",
       period: "/month",
-      description: "For growing e-commerce stores.",
-      features: [
-        "50 Product Uploads/mo",
-        "High Resolution 4K Textures",
-        "Custom Branding",
-        "Analytics Dashboard",
-        "Priority Email Support"
-      ],
-      cta: "Start Free Trial",
+      description: dict.pricing.growth.desc,
+      features: dict.pricing.growth.features,
+      cta: dict.pricing.growth.cta,
       highlighted: true
     },
     {
-      name: "Enterprise",
+      name: dict.pricing.enterprise.name,
       price: "Custom",
       period: "",
-      description: "For large catalogs and custom needs.",
-      features: [
-        "Unlimited Uploads",
-        "API Access",
-        "White-label Solution",
-        "Dedicated Success Manager",
-        "SLA Guarantee"
-      ],
-      cta: "Contact Sales",
+      description: dict.pricing.enterprise.desc,
+      features: dict.pricing.enterprise.features,
+      cta: dict.pricing.enterprise.cta,
       highlighted: false
     }
   ];
@@ -52,9 +35,9 @@ export default function Pricing() {
     <section id="pricing" className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold text-primary mb-4">Simple, Transparent Pricing</h2>
+          <h2 className="text-3xl font-bold text-primary mb-4">{dict.pricing.title}</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Start for free, upgrade as you grow. No hidden fees.
+            {dict.pricing.subtitle}
           </p>
         </div>
 
@@ -75,7 +58,7 @@ export default function Pricing() {
                 <span className="text-gray-500">{plan.period}</span>
               </div>
               <ul className="space-y-4 mb-8 flex-1">
-                {plan.features.map((feature, i) => (
+                {plan.features.map((feature: string, i: number) => (
                   <li key={i} className="flex items-start gap-3 text-gray-600 text-sm">
                     <Check size={18} className="text-secondary flex-shrink-0 mt-0.5" />
                     <span>{feature}</span>

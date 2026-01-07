@@ -1,21 +1,21 @@
-import { Upload, Cpu, Smartphone, ScanLine, Share2, BarChart3 } from 'lucide-react';
+import { Upload, Cpu, Smartphone } from 'lucide-react';
 
-export default function HowItWorks() {
+export default function HowItWorks({ dict }: { dict: any }) {
   const steps = [
     {
       icon: <Upload size={32} className="text-secondary" />,
-      title: "1. Upload Product Photos",
-      description: "Simply upload your existing high-quality product images. No complex 3D scanning equipment required."
+      title: dict.howItWorks.steps["1"].title,
+      description: dict.howItWorks.steps["1"].desc
     },
     {
       icon: <Cpu size={32} className="text-secondary" />,
-      title: "2. AI Generates 3D Model",
-      description: "Our advanced AI analyzes geometry and textures to reconstruct a photorealistic 3D model in seconds."
+      title: dict.howItWorks.steps["2"].title,
+      description: dict.howItWorks.steps["2"].desc
     },
     {
       icon: <Smartphone size={32} className="text-secondary" />,
-      title: "3. Embed AR Viewer",
-      description: "Copy a simple code snippet to your product page. Customers can now view the item in their room instantly."
+      title: dict.howItWorks.steps["3"].title,
+      description: dict.howItWorks.steps["3"].desc
     }
   ];
 
@@ -23,9 +23,9 @@ export default function HowItWorks() {
     <section id="how-it-works" className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold text-primary mb-4">From Photo to AR in Minutes</h2>
+          <h2 className="text-3xl font-bold text-primary mb-4">{dict.howItWorks.title}</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Forget expensive 3D studios. SpaceCheck makes AR accessible for every retailer.
+            {dict.howItWorks.subtitle}
           </p>
         </div>
 

@@ -1,36 +1,36 @@
 import { ScanLine, Layers, Zap, Globe, Lock, Palette } from 'lucide-react';
 
-export default function Features() {
+export default function Features({ dict }: { dict: any }) {
   const features = [
     {
       icon: <Zap className="text-secondary" size={24} />,
-      title: "Instant Processing",
-      description: "Get production-ready AR models in under 2 minutes. Scale your catalog digitization effortlessly."
+      title: dict.features.items.instant.title,
+      description: dict.features.items.instant.desc
     },
     {
       icon: <Globe className="text-secondary" size={24} />,
-      title: "Universal Compatibility",
-      description: "Works natively on iOS (QuickLook) and Android (SceneViewer) without requiring any app download."
+      title: dict.features.items.universal.title,
+      description: dict.features.items.universal.desc
     },
     {
       icon: <Layers className="text-secondary" size={24} />,
-      title: "High Fidelity Textures",
-      description: "Our AI preserves fabric details and material properties for realistic furniture visualization."
+      title: dict.features.items.textures.title,
+      description: dict.features.items.textures.desc
     },
     {
       icon: <ScanLine className="text-secondary" size={24} />,
-      title: "Seamless Integration",
-      description: "Works with Shopify, WooCommerce, Magento, and custom stacks. Just copy and paste."
+      title: dict.features.items.integration.title,
+      description: dict.features.items.integration.desc
     },
     {
       icon: <Palette className="text-secondary" size={24} />,
-      title: "Custom Branding",
-      description: "Customize the AR viewer interface to match your brand's colors and style guidelines."
+      title: dict.features.items.branding.title,
+      description: dict.features.items.branding.desc
     },
     {
       icon: <Lock className="text-secondary" size={24} />,
-      title: "Secure Hosting",
-      description: "All assets are encrypted and served via a global CDN for lightning-fast loading speeds."
+      title: dict.features.items.hosting.title,
+      description: dict.features.items.hosting.desc
     }
   ];
 
@@ -38,9 +38,9 @@ export default function Features() {
     <section id="features" className="py-24 bg-muted/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold text-primary mb-4">Why Top Retailers Choose SpaceCheck</h2>
+          <h2 className="text-3xl font-bold text-primary mb-4">{dict.features.title}</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Built for performance, conversion, and ease of use.
+            {dict.features.subtitle}
           </p>
         </div>
 

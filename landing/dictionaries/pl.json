@@ -1,0 +1,159 @@
+{
+  "nav": {
+    "features": "Funkcje",
+    "howItWorks": "Jak to działa",
+    "pricing": "Cennik",
+    "login": "Zaloguj",
+    "getStarted": "Rozpocznij"
+  },
+  "hero": {
+    "newBadge": "Nowość: Generowanie 3D przez AI",
+    "titleStart": "Zamień zdjęcia produktów w",
+    "titleEnd": "Sprzedażowe Maszyny AR",
+    "subtitle": "SpaceCheck automatyzuje tworzenie modeli 3D dla sprzedawców mebli. Zwiększ konwersję o 40% i zmniejsz liczbę zwrotów, pozwalając klientom zobaczyć produkty w ich domach.",
+    "ctaStart": "Rozpocznij Okres Próbny",
+    "ctaDemo": "Zobacz Demo",
+    "disclaimer": "Bez karty kredytowej • 14 dni za darmo",
+    "photoLabel": "Zwykłe Zdjęcie",
+    "arLabel": "Widok AR Aktywny",
+    "livePreview": "Podgląd AR na Żywo"
+  },
+  "features": {
+    "title": "Dlaczego najlepsi wybierają SpaceCheck",
+    "subtitle": "Stworzony dla wydajności, konwersji i łatwości użytkowania.",
+    "items": {
+      "instant": {
+        "title": "Błyskawiczne Przetwarzanie",
+        "desc": "Otrzymaj gotowe modele AR w mniej niż 2 minuty. Skaluj cyfryzację katalogu bez wysiłku."
+      },
+      "universal": {
+        "title": "Uniwersalna Kompatybilność",
+        "desc": "Działa natywnie na iOS (QuickLook) i Android (SceneViewer) bez konieczności pobierania aplikacji."
+      },
+      "textures": {
+        "title": "Tekstury Wysokiej Wierności",
+        "desc": "Nasze AI zachowuje detale tkanin i właściwości materiałów dla realistycznej wizualizacji mebli."
+      },
+      "integration": {
+        "title": "Bezproblemowa Integracja",
+        "desc": "Działa z Shopify, WooCommerce, Magento i własnymi rozwiązaniami. Wystarczy skopiować i wkleić."
+      },
+      "branding": {
+        "title": "Własny Branding",
+        "desc": "Dostosuj interfejs przeglądarki AR do kolorów i stylu Twojej marki."
+      },
+      "hosting": {
+        "title": "Bezpieczny Hosting",
+        "desc": "Wszystkie zasoby są szyfrowane i serwowane przez globalną sieć CDN dla błyskawicznego ładowania."
+      }
+    }
+  },
+  "howItWorks": {
+    "title": "Od Zdjęcia do AR w Minuty",
+    "subtitle": "Zapomnij o drogich studiach 3D. SpaceCheck sprawia, że AR jest dostępne dla każdego sprzedawcy.",
+    "steps": {
+      "1": {
+        "title": "1. Wgraj Zdjęcia Produktu",
+        "desc": "Po prostu wgraj swoje istniejące zdjęcia wysokiej jakości. Nie potrzeba skomplikowanego sprzętu skanującego."
+      },
+      "2": {
+        "title": "2. AI Generuje Model 3D",
+        "desc": "Nasze zaawansowane AI analizuje geometrię i tekstury, aby zrekonstruować fotorealistyczny model 3D w sekundy."
+      },
+      "3": {
+        "title": "3. Osadź Przeglądarkę AR",
+        "desc": "Skopiuj prosty kod na stronę produktu. Klienci mogą natychmiast zobaczyć przedmiot w swoim pokoju."
+      }
+    }
+  },
+  "omnichannel": {
+    "title": "Połącz Salon z Domem Klienta",
+    "subtitle": "Nie trać klientów, którzy wychodzą ze sklepu, aby 'zmierzyć pokój'. Daj im narzędzie do natychmiastowej wizualizacji.",
+    "feature1Title": "Automatyczne Plakaty",
+    "feature1Desc": "SpaceCheck automatycznie tworzy gotowe do druku plakaty QR dla każdego produktu w Twoim katalogu.",
+    "feature2Title": "Szybsze Zamykanie Sprzedaży",
+    "feature2Desc": "Klienci skanują etykietę w sklepie i natychmiast widzą, czy mebel pasuje do ich przestrzeni.",
+    "imageCaption": "Rzeczywisty plakat PDF wygenerowany przez SpaceCheck"
+  },
+  "demo": {
+    "title": "Przekonaj się sam",
+    "subtitle": "Zeskanuj kod QR, aby zobaczyć, jak potencjalny klient zobaczyłby 'Stół Bach' w swojej przestrzeni.",
+    "step1Title": "Otwórz Aparat",
+    "step1Desc": "Skieruj aparat telefonu na kod QR.",
+    "step2Title": "Kliknij Powiadomienie",
+    "step2Desc": "Kliknij baner, który się pojawi, aby uruchomić przeglądarkę AR.",
+    "step3Title": "Umieść w Pokoju",
+    "step3Desc": "Poruszaj lekko telefonem, aby wykryć podłogę i umieścić obiekt.",
+    "productName": "Stół Bach",
+    "collection": "",
+    "scanMe": "SKANUJ MNIE",
+    "mobileBtn": "Lub Kliknij Tutaj (Mobile)"
+  },
+  "pricing": {
+    "title": "Prosty, Przejrzysty Cennik",
+    "subtitle": "Zacznij za darmo, rozszerzaj w miarę wzrostu. Żadnych ukrytych opłat.",
+    "starter": {
+      "name": "Starter",
+      "desc": "Idealny na start.",
+      "cta": "Rozpocznij Za Darmo",
+      "features": ["3 Wgrania Produktów/mies", "Standardowa Rozdzielczość", "Przeglądarka Web AR", "Wsparcie Społeczności"]
+    },
+    "growth": {
+      "name": "Wzrost",
+      "desc": "Dla rosnących sklepów e-commerce.",
+      "cta": "Darmowy Okres Próbny",
+      "features": ["50 Wgrań Produktów/mies", "Wysoka Rozdzielczość Tekstur 4K", "Własny Branding", "Panel Analityczny", "Priorytetowe Wsparcie Email"]
+    },
+    "enterprise": {
+      "name": "Enterprise",
+      "desc": "Dla dużych katalogów i potrzeb niestandardowych.",
+      "cta": "Skontaktuj się z Działem Sprzedaży",
+      "features": ["Nielimitowane Wgrania", "Dostęp do API", "Rozwiązanie White-label", "Dedykowany Opiekun Klienta", "Gwarancja SLA"]
+    }
+  },
+  "faq": {
+    "title": "Często Zadawane Pytania",
+    "subtitle": "Wszystko, co musisz wiedzieć o integracji AR w swoim sklepie.",
+    "q1": "Czy potrzebuję skanera 3D, aby używać SpaceCheck?",
+    "a1": "Nie. SpaceCheck używa zaawansowanego AI do generowania modeli 3D ze zwykłych zdjęć produktów 2D. Potrzebujesz tylko wyraźnego zdjęcia mebla.",
+    "q2": "Czy to działa na iPhone i Android?",
+    "a2": "Tak. Automatycznie konwertujemy modele do USDZ (dla iOS QuickLook) i GLB (dla Android SceneViewer), aby zapewnić natywną kompatybilność na wszystkich nowoczesnych smartfonach bez konieczności pobierania aplikacji.",
+    "q3": "Jak dodać to do mojego sklepu online?",
+    "a3": "To tak proste jak osadzenie filmu z YouTube. Dostarczamy krótki fragment kodu HTML, który kopiujesz i wklejasz do szablonu strony produktu. Działa z Shopify, WooCommerce, Magento i stronami własnymi.",
+    "q4": "Co jeśli model AI nie będzie idealny?",
+    "a4": "Nasze AI jest trenowane specjalnie na zestawach danych meblowych dla wysokiej dokładności. Możesz jednak również ręcznie wgrać własne pliki 3D, jeśli już je posiadasz, używając naszej przeglądarki do hostingu i doświadczenia AR.",
+    "q5": "Is there a limit to how many people can view the models?",
+    "a5": "Nasz plan Starter zawiera hojne limity przepustowości odpowiednie dla małych sklepów. Plany Enterprise oferują nielimitowane wyświetlenia i globalne buforowanie CDN dla sprzedawców o dużym ruchu."
+    },
+    "generator": {
+      "headerTitle": "Generator Kodów QR AR",
+      "headerSubtitle": "Szybki Generator - Twórz kody QR AR dla swoich modeli",
+      "formTitle": "Informacje o Produkcie",
+      "formDesc": "Wypełnij szczegóły produktu, aby wygenerować kod QR AR.",
+      "productNameLabel": "Nazwa Produktu *",
+      "productNamePlaceholder": "np. Nowoczesna Sofa Kolekcja",
+      "modelPathLabel": "Ścieżka do Modelu *",
+      "modelPathPlaceholder": "np. kler/bach.glb lub nowak/table.glb",
+      "modelPathSmallText": "Wprowadź ścieżkę do modelu GLB w formacie: marka/nazwa_pliku.glb",
+      "widthLabel": "Szerokość (cm) *",
+      "heightLabel": "Wysokość (cm) *",
+      "depthLabel": "Głębokość (cm) *",
+      "generateBtn": "Wygeneruj Kod QR AR",
+      "resultTitle": "Twój Kod QR AR jest Gotowy!",
+      "marketingTitle": "Zobacz w swoim pokoju",
+      "marketingSubtitle": "Zeskanuj aparatem w telefonie",
+      "marketingArVis": "Wizualizacja AR",
+      "downloadBtn": "Pobierz Plakat",
+      "copyLinkBtn": "Kopiuj Link",
+      "printBtn": "Drukuj",
+      "generatedData": "Wygenerowane Dane:",
+      "resetBtn": "Wygeneruj Kolejny",
+      "footerText": "Generator Kodów QR AR",
+      "footerSubtext": "Technologia AR dla Twojego biznesu",
+      "toastCopied": "Link skopiowany do schowka!",
+      "toastFailed": "Nie udało się skopiować linku",
+      "toastModelPathRequired": "Proszę wprowadzić ścieżkę do modelu 3D",
+      "toastModelPathFormat": "Ścieżka modelu musi kończyć się na .glb"
+    }
+  }
+  

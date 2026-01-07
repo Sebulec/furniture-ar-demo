@@ -1,32 +1,32 @@
 import Link from 'next/link';
-import { ArrowRight, Smartphone, Box, Zap } from 'lucide-react';
+import Image from 'next/image';
+import { ArrowRight, Smartphone, Zap } from 'lucide-react';
 
-export default function Hero() {
+export default function Hero({ dict, lang }: { dict: any, lang: string }) {
   return (
     <section className="pt-32 pb-20 overflow-hidden bg-gradient-to-b from-white to-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div className="text-center max-w-4xl mx-auto mb-16">
           <div className="inline-flex items-center gap-2 bg-accent/50 text-secondary px-4 py-1.5 rounded-full text-sm font-semibold mb-6 border border-accent">
             <Zap size={16} />
-            <span>New: AI-Powered 3D Generation</span>
+            <span>{dict.hero.newBadge}</span>
           </div>
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-8 text-primary">
-            Turn Product Photos into <br/>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">AR Sales Machines</span>
+            {dict.hero.titleStart} <br/>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">{dict.hero.titleEnd}</span>
           </h1>
           <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
-            SpaceCheck automates 3D model creation for furniture retailers. 
-            Increase conversion by 40% and reduce returns by letting customers visualize products in their homes.
+            {dict.hero.subtitle}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/register" className="inline-flex items-center justify-center gap-2 bg-secondary text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-opacity-90 transition-all shadow-xl shadow-secondary/20">
-              Start Free Trial <ArrowRight size={20} />
+              {dict.hero.ctaStart} <ArrowRight size={20} />
             </Link>
             <Link href="#demo" className="inline-flex items-center justify-center gap-2 bg-white text-primary border border-gray-200 px-8 py-4 rounded-full text-lg font-semibold hover:bg-gray-50 transition-all">
-              View Demo
+              {dict.hero.ctaDemo}
             </Link>
           </div>
-          <p className="mt-4 text-sm text-gray-500">No credit card required • 14-day free trial</p>
+          <p className="mt-4 text-sm text-gray-500">{dict.hero.disclaimer}</p>
         </div>
 
         {/* Hero Visual */}
@@ -34,13 +34,16 @@ export default function Hero() {
             <div className="absolute -inset-1 bg-gradient-to-r from-secondary to-primary rounded-2xl blur opacity-20"></div>
             <div className="relative bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden aspect-[16/9] flex">
                 {/* Left: Standard Photo */}
-                <div className="w-1/2 bg-gray-50 flex flex-col items-center justify-center border-r border-gray-100 p-8">
-                    <div className="relative w-full max-w-xs aspect-[3/4] bg-white shadow-md rounded-lg p-2 rotate-[-2deg] transition-transform hover:rotate-0">
-                         <div className="w-full h-full bg-gray-200 rounded flex items-center justify-center text-gray-400">
-                            <Box size={48} />
-                         </div>
-                         <div className="absolute bottom-4 left-4 font-semibold text-gray-700">Standard Photo</div>
-                    </div>
+                <div className="w-1/2 bg-gray-50 flex flex-col items-center justify-center border-r border-gray-100 relative">
+                     <Image 
+                        src="/hero-photo.jpg" 
+                        alt="Standard Furniture Photo" 
+                        fill
+                        className="object-cover"
+                     />
+                     <div className="absolute bottom-4 left-4 font-semibold text-white bg-black/50 px-3 py-1 rounded backdrop-blur-sm">
+                        {dict.hero.photoLabel}
+                     </div>
                 </div>
 
                 {/* Right: AR View */}
@@ -53,7 +56,7 @@ export default function Hero() {
                         {/* Fake Phone Screen */}
                         <div className="w-full h-full bg-gray-800 relative">
                              {/* Camera Feed Simulation */}
-                             <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80')] bg-cover bg-center opacity-50"></div>
+                             <div className="absolute inset-0 bg-[url('/hero-photo.jpg')] bg-cover bg-center opacity-50"></div>
                              
                              {/* 3D Object Overlay */}
                              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-secondary/80 backdrop-blur-sm rounded-lg shadow-2xl animate-pulse flex items-center justify-center text-white font-bold border border-white/50">
@@ -61,13 +64,13 @@ export default function Hero() {
                              </div>
                              
                              <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white text-xs bg-black/50 px-3 py-1 rounded-full backdrop-blur-md">
-                                AR View Active
+                                {dict.hero.arLabel}
                              </div>
                         </div>
                     </div>
                     <div className="absolute bottom-8 right-8 text-white/80 flex items-center gap-2">
                         <Smartphone size={20} />
-                        <span className="text-sm font-medium">Live AR Preview</span>
+                        <span className="text-sm font-medium">{dict.hero.livePreview}</span>
                     </div>
                 </div>
             </div>
