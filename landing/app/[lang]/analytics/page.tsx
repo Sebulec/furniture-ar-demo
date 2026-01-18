@@ -38,7 +38,7 @@ interface AnalyticsResponse {
   rawData: any[];
 }
 
-export default function AnalyticsPage({ params }: { params: { lang: 'en' | 'pl' } }) {
+export default function AnalyticsPage({ lang }: { lang: string }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -160,7 +160,7 @@ export default function AnalyticsPage({ params }: { params: { lang: 'en' | 'pl' 
             </form>
 
             <div className="mt-6 text-center">
-              <Link href={`/${params.lang}`} className="text-[#208a93] text-sm hover:underline">
+              <Link href={`/${lang}`} className="text-[#208a93] text-sm hover:underline">
                 ← Back to Home
               </Link>
             </div>
@@ -402,7 +402,7 @@ export default function AnalyticsPage({ params }: { params: { lang: 'en' | 'pl' 
       </main>
 
       <footer className="bg-gray-50 text-gray-600 py-6 text-center mt-8">
-        <Link href={`/${params.lang}`} className="text-[#208a93] hover:underline">
+        <Link href={`/${lang}`} className="text-[#208a93] hover:underline">
           ← Back to Home
         </Link>
       </footer>
