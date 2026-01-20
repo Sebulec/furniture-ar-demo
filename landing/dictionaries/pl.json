@@ -13,6 +13,8 @@
     "subtitle": "SpaceCheck automatyzuje tworzenie modeli 3D dla sprzedawców mebli. Zwiększ konwersję o 40% i zmniejsz liczbę zwrotów, pozwalając klientom zobaczyć produkty w ich domach.",
     "ctaStart": "Rozpocznij Okres Próbny",
     "ctaDemo": "Zobacz Demo",
+    "waitlistPlaceholder": "Wpisz swój email służbowy",
+    "waitlistButton": "Dołącz do listy oczekujących",
     "disclaimer": "Bez karty kredytowej • 14 dni za darmo",
     "photoLabel": "Zwykłe Zdjęcie",
     "arLabel": "Widok AR Aktywny",
@@ -154,6 +156,13 @@
       "toastFailed": "Nie udało się skopiować linku",
       "toastModelPathRequired": "Proszę wprowadzić ścieżkę do modelu 3D",
       "toastModelPathFormat": "Ścieżka modelu musi kończyć się na .glb"
-    }
+    },
+  "footer": {
+    "description": "Sprawiamy, że AR jest dostępne dla każdego sprzedawcy mebli. Zwiększ sprzedaż dzięki immersyjnej wizualizacji produktów.",
+    "product": "Produkt",
+    "resources": "Zasoby",
+    "company": "Firma",
+    "rights": "SpaceCheck Inc. Wszelkie prawa zastrzeżone."
   }
+}
   

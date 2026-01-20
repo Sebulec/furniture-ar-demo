@@ -1,6 +1,12 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, Smartphone, Zap } from 'lucide-react';
+import Waitlist from './Waitlist';
+import dynamic from 'next/dynamic';
+
+const ModelViewer = dynamic(() => import('./ModelViewer'), { ssr: false });
 
 export default function Hero({ dict, lang }: { dict: any, lang: string }) {
   return (
@@ -18,13 +24,16 @@ export default function Hero({ dict, lang }: { dict: any, lang: string }) {
           <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
             {dict.hero.subtitle}
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/register" className="inline-flex items-center justify-center gap-2 bg-secondary text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-opacity-90 transition-all shadow-xl shadow-secondary/20">
-              {dict.hero.ctaStart} <ArrowRight size={20} />
-            </Link>
-            <Link href="#demo" className="inline-flex items-center justify-center gap-2 bg-white text-primary border border-gray-200 px-8 py-4 rounded-full text-lg font-semibold hover:bg-gray-50 transition-all">
-              {dict.hero.ctaDemo}
-            </Link>
+          <div className="flex flex-col gap-6 justify-center max-w-lg mx-auto">
+            <Waitlist 
+              ctaText={dict.hero.waitlistButton} 
+              placeholderText={dict.hero.waitlistPlaceholder} 
+            />
+            <div className="flex justify-center">
+              <Link href="#demo" className="inline-flex items-center justify-center gap-2 text-primary hover:text-secondary transition-colors text-sm font-medium">
+                {dict.hero.ctaDemo} <ArrowRight size={16} />
+              </Link>
+            </div>
           </div>
           <p className="mt-4 text-sm text-gray-500">{dict.hero.disclaimer}</p>
         </div>
@@ -53,17 +62,11 @@ export default function Hero({ dict, lang }: { dict: any, lang: string }) {
                          <div className="absolute bottom-20 right-20 w-32 h-32 border border-white/20 rounded-full"></div>
                     </div>
                     <div className="relative z-10 w-full max-w-xs aspect-[9/16] bg-black rounded-[2rem] border-4 border-gray-700 shadow-2xl flex flex-col items-center justify-center overflow-hidden">
-                        {/* Fake Phone Screen */}
+                        {/* 3D Model Viewer */}
                         <div className="w-full h-full bg-gray-800 relative">
-                             {/* Camera Feed Simulation */}
-                             <div className="absolute inset-0 bg-[url('/hero-photo.jpg')] bg-cover bg-center opacity-50"></div>
+                             <ModelViewer />
                              
-                             {/* 3D Object Overlay */}
-                             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-secondary/80 backdrop-blur-sm rounded-lg shadow-2xl animate-pulse flex items-center justify-center text-white font-bold border border-white/50">
-                                3D Model
-                             </div>
-                             
-                             <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white text-xs bg-black/50 px-3 py-1 rounded-full backdrop-blur-md">
+                             <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white text-xs bg-black/50 px-3 py-1 rounded-full backdrop-blur-md pointer-events-none">
                                 {dict.hero.arLabel}
                              </div>
                         </div>

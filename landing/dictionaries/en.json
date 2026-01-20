@@ -13,6 +13,8 @@
     "subtitle": "SpaceCheck automates 3D model creation for furniture retailers. Increase conversion by 40% and reduce returns by letting customers visualize products in their homes.",
     "ctaStart": "Start Free Trial",
     "ctaDemo": "View Demo",
+    "waitlistPlaceholder": "Enter your work email",
+    "waitlistButton": "Join Waitlist",
     "disclaimer": "No credit card required • 14-day free trial",
     "photoLabel": "Standard Photo",
     "arLabel": "AR View Active",
@@ -154,6 +156,13 @@
       "toastFailed": "Failed to copy link.",
       "toastModelPathRequired": "Please enter a 3D model path",
       "toastModelPathFormat": "Model path must end with .glb"
-    }
+    },
+  "footer": {
+    "description": "Making AR accessible for every furniture retailer. Boost sales with immersive product visualization.",
+    "product": "Product",
+    "resources": "Resources",
+    "company": "Company",
+    "rights": "SpaceCheck Inc. All rights reserved."
   }
+}
   
