@@ -1,0 +1,161 @@
+# Furniture AR App - Simple Deployment Guide
+
+## Overview
+Clean, working implementation using Hunyuan3D-2 for 3D model generation.
+
+## Architecture
+- **Frontend**: Next.js 16 (landing/)
+- **Backend**: Modal.com (spacecheck_backend.py)
+- **Database**: Supabase
+- **3D Generation**: Replicate (tencent/hunyuan3d-2)
+
+## Prerequisites
+- Node.js 18+
+- Modal CLI installed (`pip install modal`)
+- Replicate API token
+- Supabase account
+
+## Backend Deployment
+
+### 1. Set Modal Secrets
+```bash
+modal secret create spacecheck-secrets \
+  REPLICATE_API_TOKEN=r8_your_token \
+  NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co \
+  SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+```
+
+### 2. Deploy Backend
+```bash
+modal deploy spacecheck_backend.py
+```
+
+### 3. Get Modal URL
+After deployment, Modal will output a URL like:
+```
+https://<username>--spacecheck-backend-generate.modal.run
+```
+
+Save this URL for the frontend.
+
+## Frontend Deployment
+
+### 1. Set Environment Variables
+Create `landing/.env.local`:
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+MODAL_API_URL=https://your-modal-url.modal.run
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+```
+
+### 2. Install Dependencies
+```bash
+cd landing
+npm install
+```
+
+### 3. Run Development Server
+```bash
+npm run dev
+```
+
+### 4. Deploy to Vercel (Optional)
+```bash
+vercel deploy
+```
+
+## Database Setup (Supabase)
+
+### Required Tables
+
+#### `generations` table
+```sql
+CREATE TABLE generations (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users NOT NULL,
+  input_image_url TEXT NOT NULL,
+  status TEXT NOT NULL CHECK (status IN ('processing', 'completed', 'failed')),
+  glb_url TEXT,
+  usdz_url TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_generations_user_status ON generations(user_id, status);
+CREATE INDEX idx_generations_created_at ON generations(created_at DESC);
+```
+
+#### Storage bucket: `uploads`
+- Create public bucket named `uploads`
+- Enable public access for file URLs
+
+## Pipeline Flow
+
+1. **User uploads image** → Frontend
+2. **Image saved to Supabase storage** → `uploads/` bucket
+3. **Record created** → `generations` table (status: processing)
+4. **API call** → `/api/generate` → Modal backend
+5. **Modal generates 3D model** → Hunyuan3D-2 on Replicate (single pass with textures)
+6. **Model downloaded** → Resized to user dimensions
+7. **Converted to USDZ** → Using Blender
+8. **Uploaded** → Supabase storage
+9. **Database updated** → status: completed, with URLs
+
+## Model Parameters
+
+**Hunyuan3D-2** (tencent/hunyuan3d-2):
+- Input: image (URL)
+- Parameters: steps (50), octree_resolution (256), texture (true), remove_background (true)
+- Output: GLB file with textures
+- Generation time: ~5-10 minutes
+- High quality meshes with textures
+
+## Retry Functionality
+
+Failed generations show a "Retry Generation" button that:
+- Resets status to processing
+- Uses default dimensions (100x100x100 cm)
+- Re-triggers Modal backend
+- Polls for completion
+
+## Cost Estimate
+
+- **Replicate**: ~$0.05-0.10 per generation
+- **Modal**: ~$0.01-0.02 per generation
+- **Supabase**: Free tier (up to 500MB storage)
+
+## Troubleshooting
+
+### Model 404 Error
+- Check model exists: https://replicate.com/tencent/hunyuan3d-2
+- Verify API token is correct
+- Model should work with version: b1b9449a1277e10402781c5d41eb30c0a0683504fb23fab591ca9dfc2aabe1cb
+
+### Rate Limit (429)
+- Add credit to Replicate: https://replicate.com/account/billing
+- Wait 60 seconds between requests
+
+### Upload Fails
+- Check Supabase storage bucket is public
+- Verify CORS settings allow uploads
+- Check storage quota
+
+### Generation Stuck
+- Check Modal logs: `modal app logs spacecheck-backend`
+- Verify Replicate API token has credit
+- Check image URL is publicly accessible
+
+## Next Steps (Experiments)
+
+After this working baseline, you can experiment with:
+- Different 3D models (TripoSR, Stable-Fast-3D)
+- Texture enhancement pipelines
+- Custom training/fine-tuning
+- Batch processing
+- Quality improvements
+
+## Support
+
+- Modal docs: https://modal.com/docs
+- Replicate docs: https://replicate.com/docs
+- Supabase docs: https://supabase.com/docs
