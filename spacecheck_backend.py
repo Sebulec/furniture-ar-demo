@@ -162,15 +162,17 @@ def process_generation(item: dict):
         # Generate 3D model using the working Hunyuan3D-2.1 version
         print(f"Generating 3D model from image: {image_url}")
 
-        output = replicate.run(
-            "ndreca/hunyuan3d-2.1",
-            input={
-                "image": image_url,
-                "steps": 50,
-                "octree_resolution": 256,
-                "generate_texture": True,
-                "remove_background": True
-            }
+        # Fetch model and latest version explicitly to avoid 404
+        model = replicate.models.get("ndreca/hunyuan3d-2.1")
+        version = model.versions.list()[0]
+        print(f"Using model version: {version.id}")
+        
+        output = version.predict(
+            image=image_url,
+            steps=50,
+            octree_resolution=256,
+            generate_texture=True,
+            remove_background=True
         )
 
         print(f"Hunyuan3D-2.1 output: {output}")
