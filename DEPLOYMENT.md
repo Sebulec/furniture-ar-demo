@@ -1,13 +1,13 @@
 # Furniture AR App - Simple Deployment Guide
 
 ## Overview
-Clean, working implementation using Hunyuan3D-2 for 3D model generation.
+Clean, working implementation using Hunyuan3D-2.1 for 3D model generation with textures.
 
 ## Architecture
 - **Frontend**: Next.js 16 (landing/)
 - **Backend**: Modal.com (spacecheck_backend.py)
 - **Database**: Supabase
-- **3D Generation**: Replicate (tencent/hunyuan3d-2)
+- **3D Generation**: Replicate (ndreca/hunyuan3d-2.1)
 
 ## Prerequisites
 - Node.js 18+
@@ -95,7 +95,7 @@ CREATE INDEX idx_generations_created_at ON generations(created_at DESC);
 2. **Image saved to Supabase storage** → `uploads/` bucket
 3. **Record created** → `generations` table (status: processing)
 4. **API call** → `/api/generate` → Modal backend
-5. **Modal generates 3D model** → Hunyuan3D-2 on Replicate (single pass with textures)
+5. **Modal generates 3D model** → Hunyuan3D-2.1 on Replicate (single pass with textures)
 6. **Model downloaded** → Resized to user dimensions
 7. **Converted to USDZ** → Using Blender
 8. **Uploaded** → Supabase storage
@@ -103,12 +103,12 @@ CREATE INDEX idx_generations_created_at ON generations(created_at DESC);
 
 ## Model Parameters
 
-**Hunyuan3D-2** (tencent/hunyuan3d-2):
+**Hunyuan3D-2.1** (ndreca/hunyuan3d-2.1):
 - Input: image (URL)
-- Parameters: steps (50), octree_resolution (256), texture (true), remove_background (true)
+- Parameters: steps (50), octree_resolution (256), generate_texture (true), remove_background (true)
 - Output: GLB file with textures
 - Generation time: ~5-10 minutes
-- High quality meshes with textures
+- Proven working model
 
 ## Retry Functionality
 
@@ -127,9 +127,8 @@ Failed generations show a "Retry Generation" button that:
 ## Troubleshooting
 
 ### Model 404 Error
-- Check model exists: https://replicate.com/tencent/hunyuan3d-2
-- Verify API token is correct
-- Model should work with version: b1b9449a1277e10402781c5d41eb30c0a0683504fb23fab591ca9dfc2aabe1cb
+- Check model exists: https://replicate.com/ndreca/hunyuan3d-2.1
+- Verify API token is correct and has sufficient credit
 
 ### Rate Limit (429)
 - Add credit to Replicate: https://replicate.com/account/billing

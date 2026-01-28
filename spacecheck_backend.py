@@ -159,22 +159,21 @@ def process_generation(item: dict):
             "status": "processing"
         }).eq("id", gen_id).execute()
 
-        # Generate 3D model using Hunyuan3D-2 (single pass with textures)
+        # Generate 3D model using the working Hunyuan3D-2.1 version
         print(f"Generating 3D model from image: {image_url}")
 
         output = replicate.run(
-            "tencent/hunyuan3d-2:b1b9449a1277e10402781c5d41eb30c0a0683504fb23fab591ca9dfc2aabe1cb",
+            "ndreca/hunyuan3d-2.1",
             input={
                 "image": image_url,
                 "steps": 50,
                 "octree_resolution": 256,
-                "texture": True,
-                "render": True,
+                "generate_texture": True,
                 "remove_background": True
             }
         )
 
-        print(f"Hunyuan3D-2 output: {output}")
+        print(f"Hunyuan3D-2.1 output: {output}")
 
         # Extract GLB URL from output
         if isinstance(output, str):
