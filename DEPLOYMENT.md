@@ -104,8 +104,9 @@ CREATE INDEX idx_generations_created_at ON generations(created_at DESC);
 ## Model Parameters
 
 **Hunyuan3D-2.1** (ndreca/hunyuan3d-2.1):
+- Version: 895e514f953d39e8b5bfb859df9313481ad3fa3a8631e5c54c7e5c9c85a6aa9f
 - Input: image (URL)
-- Parameters: steps (50), octree_resolution (256), generate_texture (true), remove_background (true)
+- Parameters: steps (50), octree_resolution (256), generate_texture (true), remove_background (false), seed (1234), num_chunks (8000), max_facenum (20000), guidance_scale (7.5)
 - Output: GLB file with textures
 - Generation time: ~5-10 minutes
 - Proven working model
