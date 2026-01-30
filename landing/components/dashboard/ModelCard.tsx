@@ -1,9 +1,11 @@
 'use client'
 
-import { Loader2, Box, AlertCircle, Download, Eye, RefreshCw } from 'lucide-react'
+import { Loader2, AlertCircle, Download, Eye, RefreshCw, QrCode, BarChart3, MoreVertical, Edit2, Trash2 } from 'lucide-react'
 import Image from 'next/image'
 import { retryGeneration } from '@/app/dashboard/actions'
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import { QRCodeModal } from './QRCodeModal'
+import { ModelAnalyticsModal } from './ModelAnalyticsModal'
 
 interface Generation {
   id: string
@@ -12,15 +14,33 @@ interface Generation {
   glb_url: string | null
   usdz_url: string | null
   created_at: string
+  name?: string
 }
 
 export function ModelCard({ model }: { model: Generation }) {
   const [isRetrying, setIsRetrying] = useState(false)
+  const [showQRModal, setShowQRModal] = useState(false)
+  const [showAnalyticsModal, setShowAnalyticsModal] = useState(false)
+  const [showMenu, setShowMenu] = useState(false)
+  const [isEditingName, setIsEditingName] = useState(false)
+  const [editedName, setEditedName] = useState(model.name || '')
+  const menuRef = useRef<HTMLDivElement>(null)
 
   // Check if model is in an active processing state
   const isProcessing = model.status === 'processing'
 
   const progressMessage = 'Generating 3D model...'
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowMenu(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   const handleRetry = async () => {
     setIsRetrying(true)
@@ -33,105 +53,251 @@ export function ModelCard({ model }: { model: Generation }) {
     }
   }
 
+  const handleViewInAR = () => {
+    if (model.glb_url) {
+      const viewerUrl = `/viewer.html?modelUrl=${encodeURIComponent(model.glb_url)}`
+      window.open(viewerUrl, '_blank')
+    }
+  }
+
+  const handleSaveName = async () => {
+    if (editedName.trim() && editedName !== model.name) {
+      try {
+        const { createClient } = await import('@/utils/supabase/client')
+        const supabase = createClient()
+
+        const { error } = await supabase
+          .from('generations')
+          .update({ name: editedName.trim() })
+          .eq('id', model.id)
+
+        if (error) throw error
+
+        // Refresh the page to show updated name
+        window.location.reload()
+      } catch (error) {
+        console.error('Failed to update name:', error)
+        alert('Failed to update name')
+      }
+    }
+    setIsEditingName(false)
+  }
+
+  const handleDelete = async () => {
+    if (!confirm(`Are you sure you want to delete "${model.name || 'this model'}"?`)) {
+      return
+    }
+
+    try {
+      const { createClient } = await import('@/utils/supabase/client')
+      const supabase = createClient()
+
+      // Delete the generation record
+      const { error } = await supabase
+        .from('generations')
+        .delete()
+        .eq('id', model.id)
+
+      if (error) throw error
+
+      // Refresh the page to show updated list
+      window.location.reload()
+    } catch (error) {
+      console.error('Failed to delete:', error)
+      alert('Failed to delete model')
+    }
+    setShowMenu(false)
+  }
+
   return (
-    <div className="bg-[#0f172a] border border-[#1e293b] rounded-xl overflow-hidden hover:border-[#00f0ff]/30 transition-all group">
-      {/* Image / Preview Area */}
-      <div className="relative aspect-square bg-[#050a14] overflow-hidden">
-        {model.input_image_url && (
-          <Image
-            src={model.input_image_url}
-            alt="Model Input"
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            priority={isProcessing}
-            className={`object-cover transition-opacity duration-500 ${
-              isProcessing ? 'opacity-50' : 'opacity-100'
-            }`}
-          />
-        )}
+    <>
+      <div className="bg-[#0f172a] border border-[#1e293b] rounded-xl overflow-hidden hover:border-[#00f0ff]/30 transition-all group">
+        {/* Image / Preview Area */}
+        <div className="relative aspect-square bg-[#050a14] overflow-hidden">
+          {model.input_image_url && (
+            <Image
+              src={model.input_image_url}
+              alt="Model Input"
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              priority={isProcessing}
+              className={`object-cover transition-opacity duration-500 ${
+                isProcessing ? 'opacity-50' : 'opacity-100'
+              }`}
+            />
+          )}
 
-        {/* Status Overlays */}
-        {(isProcessing || isRetrying) && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-sm">
-            <Loader2 className="w-10 h-10 text-[#00f0ff] animate-spin mb-3" />
-            <span className="text-white text-sm font-medium">
-              {isRetrying ? 'Restarting generation...' : progressMessage}
-            </span>
-          </div>
-        )}
-
-        {model.status === 'failed' && !isRetrying && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-red-900/20 backdrop-blur-sm">
-            <AlertCircle className="w-10 h-10 text-red-400 mb-2" />
-            <span className="text-red-400 text-sm font-medium">Generation Failed</span>
-          </div>
-        )}
-
-        {model.status === 'completed' && (
-            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <span className="bg-[#00f0ff] text-[#050a14] text-xs font-bold px-2 py-1 rounded">READY</span>
+          {/* Status Overlays */}
+          {(isProcessing || isRetrying) && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-sm">
+              <Loader2 className="w-10 h-10 text-[#00f0ff] animate-spin mb-3" />
+              <span className="text-white text-sm font-medium">
+                {isRetrying ? 'Restarting generation...' : progressMessage}
+              </span>
             </div>
-        )}
-      </div>
+          )}
 
-      {/* Info / Actions */}
-      <div className="p-4">
-        <div className="flex justify-between items-start mb-4">
-          <div>
-            <h3 className="font-medium text-slate-200 text-sm truncate w-32">
-                Generation #{model.id.slice(0, 6)}
-            </h3>
-            <p className="text-xs text-slate-500">
-                {new Date(model.created_at).toLocaleDateString()}
-            </p>
-          </div>
-          <Box className={`w-5 h-5 ${
-              model.status === 'completed' ? 'text-[#00f0ff]' : 'text-slate-600'
-          }`} />
+          {model.status === 'failed' && !isRetrying && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-red-900/20 backdrop-blur-sm">
+              <AlertCircle className="w-10 h-10 text-red-400 mb-2" />
+              <span className="text-red-400 text-sm font-medium">Generation Failed</span>
+            </div>
+          )}
+
+          {model.status === 'completed' && (
+            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <span className="bg-[#00f0ff] text-[#050a14] text-xs font-bold px-2 py-1 rounded">READY</span>
+            </div>
+          )}
         </div>
 
-        {model.status === 'completed' ? (
-          <div className="grid grid-cols-2 gap-2">
-            <button 
-                onClick={() => window.open(model.glb_url!, '_blank')}
-                className="flex items-center justify-center gap-2 bg-[#1e293b] hover:bg-[#2d3b55] text-slate-300 text-xs py-2 rounded transition-colors"
-            >
-              <Download size={14} /> GLB
-            </button>
-            <button 
-                onClick={() => window.open(model.usdz_url || model.glb_url!, '_blank')}
-                className="flex items-center justify-center gap-2 bg-[#00f0ff]/10 hover:bg-[#00f0ff]/20 text-[#00f0ff] text-xs py-2 rounded transition-colors border border-[#00f0ff]/20"
-            >
-              <Eye size={14} /> AR View
-            </button>
+        {/* Info / Actions */}
+        <div className="p-4">
+          <div className="mb-4 flex items-start justify-between gap-2">
+            <div className="flex-1 min-w-0">
+              {isEditingName ? (
+                <input
+                  type="text"
+                  value={editedName}
+                  onChange={(e) => setEditedName(e.target.value)}
+                  onBlur={handleSaveName}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleSaveName()
+                    if (e.key === 'Escape') {
+                      setIsEditingName(false)
+                      setEditedName(model.name || '')
+                    }
+                  }}
+                  autoFocus
+                  className="w-full bg-[#0a0f1c] border border-[#00f0ff] rounded px-2 py-1 text-slate-200 text-sm focus:outline-none"
+                />
+              ) : (
+                <h3 className="font-medium text-slate-200 text-sm truncate" title={model.name || `Generation #${model.id.slice(0, 6)}`}>
+                  {model.name || `Generation #${model.id.slice(0, 6)}`}
+                </h3>
+              )}
+              <p className="text-xs text-slate-500 mt-1">
+                {new Date(model.created_at).toLocaleDateString()}
+              </p>
+            </div>
+
+            {/* Three-dots menu */}
+            <div className="relative" ref={menuRef}>
+              <button
+                onClick={() => setShowMenu(!showMenu)}
+                className="p-1 text-slate-400 hover:text-white hover:bg-[#1e293b] rounded transition-colors"
+              >
+                <MoreVertical size={18} />
+              </button>
+
+              {showMenu && (
+                <div className="absolute right-0 top-8 bg-[#0f172a] border border-[#1e293b] rounded-lg shadow-xl z-20 min-w-[160px] overflow-hidden">
+                  <button
+                    onClick={() => {
+                      setIsEditingName(true)
+                      setShowMenu(false)
+                    }}
+                    className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-slate-300 hover:bg-[#1e293b] hover:text-white transition-colors"
+                  >
+                    <Edit2 size={14} />
+                    Edit Name
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-400 hover:bg-red-900/20 hover:text-red-300 transition-colors"
+                  >
+                    <Trash2 size={14} />
+                    Delete
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
-        ) : model.status === 'failed' ? (
-          <button
-            onClick={handleRetry}
-            disabled={isRetrying}
-            className="w-full h-[34px] flex items-center justify-center gap-2 text-xs font-medium bg-red-900/20 hover:bg-red-900/30 text-red-400 hover:text-red-300 rounded border border-red-800/50 hover:border-red-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isRetrying ? (
-              <>
-                <Loader2 className="w-3 h-3 animate-spin" />
-                Restarting...
-              </>
-            ) : (
-              <>
-                <RefreshCw className="w-3 h-3" />
-                Retry Generation
-              </>
-            )}
-          </button>
-        ) : (
-          <div className="h-[34px] flex items-center justify-center text-xs text-slate-400 italic bg-[#1e293b]/50 rounded border border-dashed border-[#1e293b]">
-            <span className="flex items-center gap-2">
-              <Loader2 className="w-3 h-3 animate-spin" />
-              Processing...
-            </span>
-          </div>
-        )}
+
+          {model.status === 'completed' ? (
+            <div className="space-y-2">
+              {/* Primary Action - View in AR */}
+              <button
+                onClick={handleViewInAR}
+                className="w-full flex items-center justify-center gap-2 bg-[#00f0ff] hover:bg-[#00f0ff]/90 text-[#050a14] text-sm font-bold py-3 rounded-lg transition-all shadow-lg hover:shadow-[0_0_20px_rgba(0,240,255,0.3)]"
+              >
+                <Eye size={16} /> View in AR
+              </button>
+
+              {/* Secondary Actions */}
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  onClick={() => setShowQRModal(true)}
+                  className="flex flex-col items-center justify-center gap-1 bg-[#1e293b] hover:bg-[#2d3b55] text-slate-300 hover:text-white text-xs py-2 rounded-lg transition-colors"
+                  title="Generate QR Code"
+                >
+                  <QrCode size={16} />
+                  <span>QR</span>
+                </button>
+                <button
+                  onClick={() => setShowAnalyticsModal(true)}
+                  className="flex flex-col items-center justify-center gap-1 bg-[#1e293b] hover:bg-[#2d3b55] text-slate-300 hover:text-white text-xs py-2 rounded-lg transition-colors"
+                  title="View Analytics"
+                >
+                  <BarChart3 size={16} />
+                  <span>Stats</span>
+                </button>
+                <button
+                  onClick={() => window.open(model.glb_url!, '_blank')}
+                  className="flex flex-col items-center justify-center gap-1 bg-[#1e293b] hover:bg-[#2d3b55] text-slate-300 hover:text-white text-xs py-2 rounded-lg transition-colors"
+                  title="Download GLB"
+                >
+                  <Download size={16} />
+                  <span>GLB</span>
+                </button>
+              </div>
+            </div>
+          ) : model.status === 'failed' ? (
+            <button
+              onClick={handleRetry}
+              disabled={isRetrying}
+              className="w-full flex items-center justify-center gap-2 text-sm font-medium bg-red-900/20 hover:bg-red-900/30 text-red-400 hover:text-red-300 py-3 rounded-lg border border-red-800/50 hover:border-red-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isRetrying ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Restarting...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="w-4 h-4" />
+                  Retry Generation
+                </>
+              )}
+            </button>
+          ) : (
+            <div className="flex items-center justify-center text-xs text-slate-400 italic bg-[#1e293b]/50 py-3 rounded-lg border border-dashed border-[#1e293b]">
+              <span className="flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Processing...
+              </span>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+
+      {/* Modals */}
+      {model.glb_url && (
+        <>
+          <QRCodeModal
+            isOpen={showQRModal}
+            onClose={() => setShowQRModal(false)}
+            modelUrl={model.glb_url}
+            modelName={model.name || `Generation #${model.id.slice(0, 6)}`}
+          />
+          <ModelAnalyticsModal
+            isOpen={showAnalyticsModal}
+            onClose={() => setShowAnalyticsModal(false)}
+            modelUrl={model.glb_url}
+            modelName={model.name || `Generation #${model.id.slice(0, 6)}`}
+          />
+        </>
+      )}
+    </>
   )
 }

@@ -78,11 +78,18 @@ CREATE TABLE generations (
   status TEXT NOT NULL CHECK (status IN ('processing', 'completed', 'failed')),
   glb_url TEXT,
   usdz_url TEXT,
+  name TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 CREATE INDEX idx_generations_user_status ON generations(user_id, status);
 CREATE INDEX idx_generations_created_at ON generations(created_at DESC);
+```
+
+**Migration for existing databases:**
+If you already have the `generations` table, add the `name` column:
+```sql
+ALTER TABLE generations ADD COLUMN name TEXT;
 ```
 
 #### Storage bucket: `uploads`

@@ -4,6 +4,7 @@ export async function GET(req: NextRequest) {
   // Simple password authentication via query param or header
   const searchParams = req.nextUrl.searchParams;
   const password = req.headers.get('authorization')?.replace('Bearer ', '') || searchParams.get('password');
+  const modelFilter = searchParams.get('model'); // Optional model filter
   const ANALYTICS_PASSWORD = process.env.ANALYTICS_PASSWORD || 'admin123';
 
   if (password !== ANALYTICS_PASSWORD) {
@@ -18,17 +19,20 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    // Build query URL with optional model filter
+    let queryUrl = `${SUPABASE_URL}/rest/v1/analytics?order=created_at.desc&limit=1000`;
+    if (modelFilter) {
+      queryUrl += `&model_name=eq.${encodeURIComponent(modelFilter)}`;
+    }
+
     // Fetch analytics data from Supabase
-    const response = await fetch(
-      `${SUPABASE_URL}/rest/v1/analytics?order=created_at.desc&limit=1000`,
-      {
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': 'application/json'
-        }
+    const response = await fetch(queryUrl, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json'
       }
-    );
+    });
 
     if (!response.ok) {
       throw new Error(`Supabase request failed: ${response.statusText}`);

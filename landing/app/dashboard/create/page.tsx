@@ -11,7 +11,10 @@ export default function CreatePage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
-  
+
+  // Product Name State
+  const [productName, setProductName] = useState('')
+
   // Dimensions State
   const [dimensions, setDimensions] = useState({
     width: '',
@@ -60,6 +63,10 @@ export default function CreatePage() {
 
   const handleUpload = async () => {
     if (!file) return
+    if (!productName.trim()) {
+        alert("Please enter a product name")
+        return
+    }
     if (!dimensions.width || !dimensions.height || !dimensions.depth) {
         alert("Please enter all dimensions")
         return
@@ -77,7 +84,7 @@ export default function CreatePage() {
 
       if (uploadError) throw uploadError
 
-      await createGeneration(filePath, dimensions)
+      await createGeneration(filePath, dimensions, productName)
     } catch (error: any) {
       // Ignore Next.js Redirect errors
       if (error.message === 'NEXT_REDIRECT' || error.digest?.includes('NEXT_REDIRECT')) {
@@ -168,12 +175,32 @@ export default function CreatePage() {
             <div className="bg-[#0f172a]/50 p-6 rounded-2xl border border-[#1e293b]">
                 <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                     <span className="w-1 h-6 bg-[#00f0ff] rounded-full"></span>
+                    Product Details
+                </h3>
+
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Product Name</label>
+                        <input
+                            type="text"
+                            value={productName}
+                            onChange={(e) => setProductName(e.target.value)}
+                            placeholder="e.g. Modern Leather Sofa"
+                            className="w-full bg-[#0a0f1c] border border-[#1e293b] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#00f0ff] transition-colors"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <div className="bg-[#0f172a]/50 p-6 rounded-2xl border border-[#1e293b]">
+                <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <span className="w-1 h-6 bg-[#00f0ff] rounded-full"></span>
                     Physical Dimensions (cm)
                 </h3>
                 <p className="text-slate-400 text-sm mb-6">
                     Enter the exact real-world dimensions of the object. The AI will scale the generated model to match these bounds.
                 </p>
-                
+
                 <div className="space-y-4">
                     <div>
                         <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Width (cm)</label>

@@ -209,16 +209,26 @@
     <script>
         // --- Dynamic Model Loading & Analytics Setup ---
 
-        // 1. Get Model from URL (e.g., ?model=sofa-01.glb)
+        // 1. Get Model from URL
         const params = new URLSearchParams(window.location.search);
-        // Default to 'model.glb' if no param is provided
-        const modelName = params.get('model') || 'model.glb';
 
-        // REPLACE 'YOUR_PROJECT_ID' with your actual Supabase Project ID (found in Project Settings -> General)
-        const SUPABASE_PROJECT_ID = 'hdrizsefokumrfambict';
+        // Support both full URL (modelUrl) and filename (model) parameters
+        let modelPath = params.get('modelUrl'); // Full URL
+        let modelName = 'model.glb';
 
-        // Construct the remote URL
-        const modelPath = `https://${SUPABASE_PROJECT_ID}.supabase.co/storage/v1/object/public/models/${modelName}`;
+        if (!modelPath) {
+            // Fallback to filename-based approach for backwards compatibility
+            modelName = params.get('model') || 'model.glb';
+
+            // REPLACE 'YOUR_PROJECT_ID' with your actual Supabase Project ID
+            const SUPABASE_PROJECT_ID = 'hdrizsefokumrfambict';
+
+            // Construct the remote URL
+            modelPath = `https://${SUPABASE_PROJECT_ID}.supabase.co/storage/v1/object/public/models/${modelName}`;
+        } else {
+            // Extract filename from full URL for analytics
+            modelName = modelPath.split('/').pop() || 'model.glb';
+        }
 
         // --- UI Elements (Defined early for availability) ---
         const modelViewer = document.querySelector('model-viewer');

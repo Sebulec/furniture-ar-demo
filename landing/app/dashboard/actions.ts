@@ -10,7 +10,7 @@ interface Dimensions {
   depth: string
 }
 
-export async function createGeneration(imagePath: string, dimensions: Dimensions) {
+export async function createGeneration(imagePath: string, dimensions: Dimensions, productName: string) {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -27,7 +27,8 @@ export async function createGeneration(imagePath: string, dimensions: Dimensions
     .insert({
       user_id: user.id,
       input_image_url: publicUrl,
-      status: 'processing'
+      status: 'processing',
+      name: productName
     })
     .select()
     .single()
