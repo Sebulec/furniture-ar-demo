@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 interface AnalyticsStats {
   totalEvents: number;
   uniqueUsers: number;
