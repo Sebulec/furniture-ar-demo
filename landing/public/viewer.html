@@ -226,8 +226,10 @@
             // Construct the remote URL
             modelPath = `https://${SUPABASE_PROJECT_ID}.supabase.co/storage/v1/object/public/models/${modelName}`;
         } else {
-            // Extract filename from full URL for analytics
-            modelName = modelPath.split('/').pop() || 'model.glb';
+            // Extract folder/filename from full URL for analytics (e.g., "kler/bach.glb")
+            const urlParts = modelPath.split('/');
+            const lastTwoParts = urlParts.slice(-2);
+            modelName = lastTwoParts.join('/');
         }
 
         // --- UI Elements (Defined early for availability) ---
