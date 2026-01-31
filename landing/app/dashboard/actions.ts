@@ -140,6 +140,32 @@ export async function retryGeneration(generationId: string) {
     throw new Error('Failed to trigger generation retry')
   }
 
+    revalidatePath('/dashboard')
+
+    return { success: true }
+
+  }
+
+  
+
+export async function deleteGeneration(generationId: string) {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
+  const { error } = await supabase
+    .from('generations')
+    .delete()
+    .eq('id', generationId)
+    .eq('user_id', user.id)
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
   revalidatePath('/dashboard')
   return { success: true }
 }
+
+  

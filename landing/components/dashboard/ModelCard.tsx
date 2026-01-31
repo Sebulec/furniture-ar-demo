@@ -2,10 +2,11 @@
 
 import { Loader2, AlertCircle, Download, Eye, RefreshCw, QrCode, BarChart3, MoreVertical, Edit2, Trash2 } from 'lucide-react'
 import Image from 'next/image'
-import { retryGeneration } from '@/app/dashboard/actions'
+import { retryGeneration, deleteGeneration } from '@/app/dashboard/actions'
 import { useState, useRef, useEffect } from 'react'
 import { QRCodeModal } from './QRCodeModal'
 import { ModelAnalyticsModal } from './ModelAnalyticsModal'
+import { useQueryClient } from '@tanstack/react-query'
 
 interface Generation {
   id: string
@@ -18,6 +19,7 @@ interface Generation {
 }
 
 export function ModelCard({ model }: { model: Generation }) {
+  const queryClient = useQueryClient()
   const [isRetrying, setIsRetrying] = useState(false)
   const [showQRModal, setShowQRModal] = useState(false)
   const [showAnalyticsModal, setShowAnalyticsModal] = useState(false)
@@ -84,7 +86,8 @@ export function ModelCard({ model }: { model: Generation }) {
   }
 
   const handleDelete = async () => {
-    if (!confirm(`Are you sure you want to delete "${model.name || 'this model'}"?`)) {
+    const displayName = model.name || `Generation #${model.id.slice(0, 6)}`
+    if (!confirm(`Are you sure you want to delete "${displayName}"?`)) {
       return
     }
 
@@ -92,16 +95,17 @@ export function ModelCard({ model }: { model: Generation }) {
       const { createClient } = await import('@/utils/supabase/client')
       const supabase = createClient()
 
-      // Delete the generation record
       const { error } = await supabase
         .from('generations')
         .delete()
         .eq('id', model.id)
 
-      if (error) throw error
+      if (error) {
+        throw new Error(error.message)
+      }
 
-      // Refresh the page to show updated list
-      window.location.reload()
+      // Invalidate and refetch the generations query
+      queryClient.invalidateQueries({ queryKey: ['generations'] })
     } catch (error) {
       console.error('Failed to delete:', error)
       alert('Failed to delete model')

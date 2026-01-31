@@ -3,11 +3,11 @@ import { createClient } from '@/utils/supabase/server'
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient()
-    const { id } = params
+    const { id } = await params
 
     // Fetch the generation status from the database
     const { data: generation, error } = await supabase

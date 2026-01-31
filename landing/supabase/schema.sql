@@ -28,6 +28,10 @@ create policy "Users can update their own generations"
   on public.generations for update
   using (auth.uid() = user_id);
 
+create policy "Users can delete their own generations"
+  on public.generations for delete
+  using (auth.uid() = user_id);
+
 -- Storage bucket for uploads
 insert into storage.buckets (id, name, public) 
 values ('uploads', 'uploads', true)
