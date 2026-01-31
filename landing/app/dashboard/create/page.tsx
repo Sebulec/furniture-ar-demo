@@ -6,6 +6,8 @@ import { createGeneration } from '../actions'
 import { UploadCloud, Loader2, FileIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
+export const dynamic = 'force-dynamic'
+
 export default function CreatePage() {
   const [file, setFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)

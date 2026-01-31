@@ -6,6 +6,8 @@ import { ModelCard } from '@/components/dashboard/ModelCard'
 import { PlusCircle, Box } from 'lucide-react'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 export default function DashboardPage() {
   const supabase = createClient()
 
