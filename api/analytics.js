@@ -15,7 +15,7 @@ export default async function handler(req, res) {
 
   // Simple password authentication via query param or header
   const password = req.headers.authorization?.replace('Bearer ', '') || req.query.password;
-  const ANALYTICS_PASSWORD = process.env.ANALYTICS_PASSWORD || 'admin123';
+  const ANALYTICS_PASSWORD = process.env.ANALYTICS_PASSWORD;
 
   if (password !== ANALYTICS_PASSWORD) {
     return res.status(401).json({ error: 'Unauthorized' });

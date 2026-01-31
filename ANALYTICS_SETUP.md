@@ -20,8 +20,6 @@ Add the following environment variable to your Vercel project or `.env.local` fi
 ANALYTICS_PASSWORD=your_secure_password_here
 ```
 
-**Default password:** `admin123` (if not set)
-
 **To set in Vercel:**
 1. Go to your project settings on Vercel
 2. Navigate to Environment Variables

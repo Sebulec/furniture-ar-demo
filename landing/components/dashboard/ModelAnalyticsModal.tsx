@@ -44,16 +44,17 @@ export function ModelAnalyticsModal({ isOpen, onClose, modelUrl, modelName }: Mo
     setError(null)
 
     try {
-      // Extract model filename from URL
-      const modelFilename = modelUrl.split('/').pop() || ''
+      // Extract model filename from URL (e.g., "kler/bach.glb")
+      const urlParts = modelUrl.split('/')
+      const modelFilename = urlParts.slice(-2).join('/') // Get last 2 parts (folder/file.glb)
 
-      // Try to get analytics (without password for now - you can add password prompt later)
-      const password = sessionStorage.getItem('analytics_password') || ''
-
-      const response = await fetch(`/api/analytics?password=${encodeURIComponent(password)}&model=${encodeURIComponent(modelFilename)}`)
+      // Use user-specific analytics endpoint (no password needed)
+      const response = await fetch(`/api/analytics/user?model=${encodeURIComponent(modelFilename)}`)
 
       if (!response.ok) {
-        throw new Error('Failed to fetch analytics. Analytics may require authentication.')
+        const errorData = await response.json()
+        console.error('Analytics API error:', errorData)
+        throw new Error(errorData.error || errorData.message || 'Failed to fetch analytics')
       }
 
       const data = await response.json()
@@ -62,6 +63,8 @@ export function ModelAnalyticsModal({ isOpen, onClose, modelUrl, modelName }: Mo
         // Filter and process data for this specific model
         const modelData = processModelData(data.rawData, modelFilename)
         setStats(modelData)
+      } else {
+        throw new Error(data.error || 'Failed to process analytics data')
       }
     } catch (err: any) {
       console.error('Analytics error:', err)

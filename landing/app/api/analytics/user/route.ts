@@ -1,31 +1,70 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/utils/supabase/server';
 
 export async function GET(req: NextRequest) {
-  // Simple password authentication via query param or header
-  const searchParams = req.nextUrl.searchParams;
-  const password = req.headers.get('authorization')?.replace('Bearer ', '') || searchParams.get('password');
-  const modelFilter = searchParams.get('model'); // Optional model filter
-  const ANALYTICS_PASSWORD = process.env.ANALYTICS_PASSWORD;
+  const supabase = await createClient();
 
-  if (password !== ANALYTICS_PASSWORD) {
+  // Get authenticated user
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-    return NextResponse.json({ error: 'Supabase configuration missing' }, { status: 500 });
-  }
+  const searchParams = req.nextUrl.searchParams;
+  const modelFilter = searchParams.get('model'); // Optional model filter
 
   try {
-    // Build query URL with optional model filter
-    let queryUrl = `${SUPABASE_URL}/rest/v1/analytics?order=created_at.desc&limit=1000`;
-    if (modelFilter) {
-      queryUrl += `&model_name=eq.${encodeURIComponent(modelFilter)}`;
+    // Get all models belonging to this user
+    const { data: userGenerations, error: genError } = await supabase
+      .from('generations')
+      .select('glb_url')
+      .eq('user_id', user.id);
+
+    if (genError) {
+      throw new Error(`Failed to fetch user models: ${genError.message}`);
     }
 
-    // Fetch analytics data from Supabase using service role key to bypass RLS
+    // Extract model names from URLs (e.g., "kler/bach.glb" from full URL)
+    const userModelNames = userGenerations
+      ?.map(gen => gen.glb_url?.split('/').slice(-2).join('/'))
+      .filter(Boolean) || [];
+
+    if (userModelNames.length === 0) {
+      return NextResponse.json({
+        success: true,
+        stats: getEmptyStats(),
+        rawData: []
+      });
+    }
+
+    const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+      return NextResponse.json({ error: 'Supabase configuration missing' }, { status: 500 });
+    }
+
+    // Fetch analytics data for user's models only
+    let queryUrl = `${SUPABASE_URL}/rest/v1/analytics?order=created_at.desc&limit=1000`;
+
+    // If specific model requested, verify it belongs to user
+    if (modelFilter) {
+      const requestedModel = modelFilter.split('/').slice(-2).join('/');
+      if (!userModelNames.includes(requestedModel)) {
+        return NextResponse.json({ error: 'Model not found' }, { status: 404 });
+      }
+      queryUrl += `&model_name=eq.${encodeURIComponent(modelFilter)}`;
+    } else {
+      // Filter to only user's models
+      const modelFilters = userModelNames.map(name => `model_name.eq.${encodeURIComponent(name)}`).join(',');
+      if (userModelNames.length === 1) {
+        queryUrl += `&model_name=eq.${encodeURIComponent(userModelNames[0])}`;
+      } else {
+        queryUrl += `&or=(${modelFilters})`;
+      }
+    }
+
     const response = await fetch(queryUrl, {
       headers: {
         'apikey': SUPABASE_SERVICE_ROLE_KEY,
@@ -56,6 +95,26 @@ export async function GET(req: NextRequest) {
       message: error.message
     }, { status: 500 });
   }
+}
+
+function getEmptyStats() {
+  return {
+    totalEvents: 0,
+    uniqueUsers: 0,
+    eventCounts: {},
+    modelViews: {},
+    devices: { ios: 0, android: 0, desktop: 0 },
+    languages: {},
+    arStats: {
+      clicks: 0,
+      activations: 0,
+      errors: 0,
+      notAvailable: 0,
+      conversionRate: '0'
+    },
+    recentEvents: [],
+    timeline: {}
+  };
 }
 
 function processAnalytics(data: any[]) {
