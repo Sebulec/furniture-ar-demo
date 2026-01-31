@@ -1,5 +1,11 @@
 import { Sidebar } from '@/components/dashboard/Sidebar'
 import QueryProvider from '@/components/providers/QueryProvider'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Dashboard | Furnite AR',
+  description: 'Manage your 3D AR furniture models',
+}
 
 export default function DashboardLayout({
   children,
